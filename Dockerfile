@@ -1,16 +1,11 @@
-FROM node:20-alpine AS deps
+FROM node:20-slim AS deps
 WORKDIR /app
-
-# Устанавливаем зависимости системы
-RUN apk add --no-cache --update libc6-compat openssl
 
 COPY package.json package-lock.json* ./
 RUN npm ci --prefer-offline --no-audit
 
-FROM node:20-alpine AS builder
+FROM node:20-slim AS builder
 WORKDIR /app
-
-RUN apk add --no-cache --update openssl
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -20,12 +15,11 @@ ENV NODE_ENV=production
 
 RUN npx prisma generate && npm run build
 
-FROM node:20-alpine AS runner
+FROM node:20-slim AS runner
 WORKDIR /app
 
-RUN apk add --no-cache --update openssl && \
-    addgroup --system --gid 1001 nodejs && \
-    adduser --system --uid 1001 nextjs
+RUN groupadd --system --gid 1001 nodejs && \
+    useradd --system --uid 1001 nextjs
 
 ENV NODE_ENV=production
 ENV NEXT_TELEMETRY_DISABLED=1
