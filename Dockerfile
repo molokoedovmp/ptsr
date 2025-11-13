@@ -1,19 +1,16 @@
 FROM node:20-alpine AS deps
 WORKDIR /app
 
-# Используем быстрое зеркало Alpine
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-    apk add --no-cache libc6-compat openssl
+# Устанавливаем зависимости системы
+RUN apk add --no-cache --update libc6-compat openssl
 
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev --ignore-scripts
+RUN npm ci --prefer-offline --no-audit
 
 FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Быстрое зеркало для builder
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-    apk add --no-cache openssl
+RUN apk add --no-cache --update openssl
 
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
@@ -26,9 +23,7 @@ RUN npx prisma generate && npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
-# Быстрое зеркало для runner
-RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
-    apk add --no-cache openssl && \
+RUN apk add --no-cache --update openssl && \
     addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
@@ -52,4 +47,6 @@ ENV PORT 3000
 ENV HOSTNAME "0.0.0.0"
 
 CMD ["node", "server.js"]
+
+
 
