@@ -7,6 +7,8 @@ RUN npm ci --prefer-offline --no-audit
 FROM node:20-slim AS builder
 WORKDIR /app
 
+RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
