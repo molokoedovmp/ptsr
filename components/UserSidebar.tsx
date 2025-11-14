@@ -11,7 +11,6 @@ import {
   Heart, 
   Settings,
   LogOut,
-  Home,
   BarChart3
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
@@ -28,9 +27,9 @@ export default function UserSidebar() {
   const pathname = usePathname()
 
   const navItems: NavItem[] = [
+    { id: 'analytics', label: 'Аналитика', href: '/analytics', icon: <BarChart3 className="w-5 h-5" /> },
     { id: 'profile', label: 'Профиль', href: '/profile', icon: <User className="w-5 h-5" /> },
     { id: 'courses', label: 'Мои курсы', href: '/my-courses', icon: <BookOpen className="w-5 h-5" /> },
-    { id: 'analytics', label: 'Аналитика', href: '/analytics', icon: <BarChart3 className="w-5 h-5" /> },
     { id: 'diary', label: 'Дневник', href: '/diary', icon: <FileText className="w-5 h-5" /> },
     { id: 'mood', label: 'Дневник настроения', href: '/mood-diary', icon: <Heart className="w-5 h-5" /> },
     { id: 'certificates', label: 'Сертификаты', href: '/certificates', icon: <Award className="w-5 h-5" /> },
@@ -66,14 +65,6 @@ export default function UserSidebar() {
 
       {/* Навигация */}
       <nav className="space-y-1">
-        <Link
-          href="/"
-          className="flex items-center space-x-3 px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 hover:text-slate-900 transition-colors"
-        >
-          <Home className="w-5 h-5" />
-          <span className="text-sm font-medium">На главную</span>
-        </Link>
-
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname?.startsWith(item.href + '/')
           
