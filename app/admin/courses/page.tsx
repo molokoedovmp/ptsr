@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
+import AdminSidebar from '@/components/admin/AdminSidebar'
 import { BookOpen, Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 
 interface Course {
@@ -88,15 +89,18 @@ export default function AdminCoursesPage() {
     <AdminProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container-custom">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                  <BookOpen className="w-8 h-8 mr-3 text-green-600" />
-                  Управление курсами
-                </h1>
-                <p className="text-gray-600 mt-2">Всего курсов: {courses.length}</p>
-              </div>
+          <div className="flex gap-6">
+            <AdminSidebar />
+            <div className="flex-1">
+              <div className="mb-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                      <BookOpen className="w-8 h-8 mr-3 text-green-600" />
+                      Управление курсами
+                    </h1>
+                    <p className="text-gray-600 mt-2">Всего курсов: {courses.length}</p>
+                  </div>
               <Link href="/admin/courses/new" className="btn-primary inline-flex items-center space-x-2">
                 <Plus className="w-5 h-5" />
                 <span>Создать курс</span>
@@ -184,6 +188,8 @@ export default function AdminCoursesPage() {
               </table>
             </div>
           )}
+            </div>
+          </div>
         </div>
       </div>
     </AdminProtectedRoute>

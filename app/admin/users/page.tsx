@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
+import AdminSidebar from '@/components/admin/AdminSidebar'
 import { Users, Search, Edit, Trash2, Plus, Mail, Shield } from 'lucide-react'
 
 interface User {
@@ -91,17 +92,20 @@ export default function AdminUsersPage() {
     <AdminProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container-custom">
-          {/* Заголовок */}
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                <Users className="w-8 h-8 mr-3 text-blue-600" />
-                Управление пользователями
-              </h1>
-              <p className="text-gray-600 mt-2">
-                Всего пользователей: {users.length}
-              </p>
-            </div>
+          <div className="flex gap-6">
+            <AdminSidebar />
+            <div className="flex-1">
+              {/* Заголовок */}
+              <div className="flex justify-between items-center mb-8">
+                <div>
+                  <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                    <Users className="w-8 h-8 mr-3 text-blue-600" />
+                    Управление пользователями
+                  </h1>
+                  <p className="text-gray-600 mt-2">
+                    Всего пользователей: {users.length}
+                  </p>
+                </div>
             <button
               onClick={() => router.push('/admin/users/new')}
               className="btn-primary inline-flex items-center space-x-2"
@@ -233,6 +237,8 @@ export default function AdminUsersPage() {
             >
               ← Вернуться в панель управления
             </Link>
+          </div>
+            </div>
           </div>
         </div>
       </div>

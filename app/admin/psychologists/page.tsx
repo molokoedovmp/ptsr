@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
+import AdminSidebar from '@/components/admin/AdminSidebar'
 import { Award, Plus, Edit, Trash2, Check, X } from 'lucide-react'
 
 interface Psychologist {
@@ -87,17 +88,20 @@ export default function AdminPsychologistsPage() {
     <AdminProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container-custom">
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                  <Award className="w-8 h-8 mr-3 text-red-600" />
-                  Управление психологами
-                </h1>
-                <p className="text-gray-600 mt-2">Всего психологов: {psychologists.length}</p>
+          <div className="flex gap-6">
+            <AdminSidebar />
+            <div className="flex-1">
+              <div className="mb-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                      <Award className="w-8 h-8 mr-3 text-red-600" />
+                      Управление психологами
+                    </h1>
+                    <p className="text-gray-600 mt-2">Всего психологов: {psychologists.length}</p>
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
 
           {psychologists.length === 0 ? (
             <div className="card text-center py-12">
@@ -179,6 +183,8 @@ export default function AdminPsychologistsPage() {
               </table>
             </div>
           )}
+            </div>
+          </div>
         </div>
       </div>
     </AdminProtectedRoute>

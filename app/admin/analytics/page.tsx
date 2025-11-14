@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
+import AdminSidebar from '@/components/admin/AdminSidebar'
 import { TrendingUp, ArrowLeft, Users, BookOpen, FileText, Calendar, Eye, Award, Monitor, Globe, Smartphone } from 'lucide-react'
 
 interface AnalyticsData {
@@ -102,18 +103,21 @@ export default function AdminAnalyticsPage() {
     <AdminProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container-custom">
-          {/* Заголовок */}
-          <div className="mb-8">
-            <div className="flex items-center justify-between">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-                  <TrendingUp className="w-8 h-8 mr-3 text-indigo-600" />
-                  Аналитика платформы
-                </h1>
-                <p className="text-gray-600 mt-2">
-                  Статистика использования и активности пользователей
-                </p>
-              </div>
+          <div className="flex gap-6">
+            <AdminSidebar />
+            <div className="flex-1">
+              {/* Заголовок */}
+              <div className="mb-8">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                      <TrendingUp className="w-8 h-8 mr-3 text-indigo-600" />
+                      Аналитика платформы
+                    </h1>
+                    <p className="text-gray-600 mt-2">
+                      Статистика использования и активности пользователей
+                    </p>
+                  </div>
               <div className="flex items-center space-x-4">
                 <select
                   value={period}
@@ -458,6 +462,8 @@ export default function AdminAnalyticsPage() {
               </div>
             </>
           )}
+            </div>
+          </div>
         </div>
       </div>
     </AdminProtectedRoute>

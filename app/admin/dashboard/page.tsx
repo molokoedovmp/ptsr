@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
+import AdminSidebar from '@/components/admin/AdminSidebar'
 import { Users, FileText, Video, BookOpen, Award, TrendingUp, Settings, AlertCircle } from 'lucide-react'
 
 interface Stats {
@@ -86,16 +87,19 @@ export default function AdminDashboardPage() {
     <AdminProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container-custom">
-          {/* Заголовок */}
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
-              <Settings className="w-8 h-8 mr-3 text-purple-600" />
-              Админ-панель
-            </h1>
-            <p className="text-gray-600 mt-2">
-              Управление платформой ПТСР Эксперт
-            </p>
-          </div>
+          <div className="flex gap-6">
+            <AdminSidebar />
+            <div className="flex-1">
+              {/* Заголовок */}
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+                  <Settings className="w-8 h-8 mr-3 text-purple-600" />
+                  Админ-панель
+                </h1>
+                <p className="text-gray-600 mt-2">
+                  Управление платформой ПТСР Эксперт
+                </p>
+              </div>
 
           {/* Статистика */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -272,6 +276,8 @@ export default function AdminDashboardPage() {
                   Статистика посещений и использования платформы
                 </p>
               </Link>
+            </div>
+          </div>
             </div>
           </div>
         </div>
