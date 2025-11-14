@@ -160,25 +160,25 @@ export default function SpiritualSupportPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="card bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
               <p className="text-gray-800 italic mb-3">
-                "Мир оставляю вам, мир Мой даю вам; не так, как мир дает, Я даю вам."
+                &quot;Мир оставляю вам, мир Мой даю вам; не так, как мир дает, Я даю вам.&quot;
               </p>
               <p className="text-sm text-gray-600">— Евангелие от Иоанна 14:27</p>
             </div>
             <div className="card bg-gradient-to-br from-green-50 to-green-100 border-green-200">
               <p className="text-gray-800 italic mb-3">
-                "Воистину, с трудностью приходит облегчение."
+                &quot;Воистину, с трудностью приходит облегчение.&quot;
               </p>
               <p className="text-sm text-gray-600">— Коран 94:5-6</p>
             </div>
             <div className="card bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
               <p className="text-gray-800 italic mb-3">
-                "Господь близок к сокрушенным сердцем и спасает смиренных духом."
+                &quot;Господь близок к сокрушенным сердцем и спасает смиренных духом.&quot;
               </p>
               <p className="text-sm text-gray-600">— Псалом 34:18</p>
             </div>
             <div className="card bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200">
               <p className="text-gray-800 italic mb-3">
-                "Каждое дыхание - это возможность начать заново."
+                &quot;Каждое дыхание - это возможность начать заново.&quot;
               </p>
               <p className="text-sm text-gray-600">— Буддийская мудрость</p>
             </div>
