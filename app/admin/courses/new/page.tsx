@@ -192,8 +192,11 @@ export default function NewCoursePage() {
                   value={formData.coverImage}
                   onChange={(e) => setFormData(prev => ({ ...prev, coverImage: e.target.value }))}
                   className="input-field"
-                  placeholder="https://example.com/image.jpg"
+                  placeholder="https://images.unsplash.com/photo-xxx"
                 />
+                <p className="mt-1 text-xs text-gray-500">
+                  Поддерживаемые хостинги: Unsplash, Imgur, Supabase. Пример: https://images.unsplash.com/photo-1590012314607-cda9d9b699ae
+                </p>
               </div>
 
               <div className="flex items-center">
