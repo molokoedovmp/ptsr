@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import UserSidebar from '@/components/UserSidebar'
 import { BookOpen, Clock, Award, TrendingUp, ArrowRight, CheckCircle } from 'lucide-react'
 
 interface Enrollment {
@@ -66,10 +67,16 @@ export default function MyCoursesPage() {
   const completedEnrollments = enrollments.filter(e => e.completed)
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 via-white to-blue-50 py-12">
-      <div className="container-custom max-w-7xl">
-        {/* Заголовок */}
-        <div className="mb-12">
+    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-slate-100 py-12">
+      <div className="container-custom">
+        <div className="flex gap-6">
+          {/* Боковая панель */}
+          <UserSidebar />
+
+          {/* Основной контент */}
+          <div className="flex-1">
+            {/* Заголовок */}
+            <div className="mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 animate-fade-in">
             Мои курсы
           </h1>
@@ -276,6 +283,8 @@ export default function MyCoursesPage() {
             )}
           </>
         )}
+          </div>
+        </div>
       </div>
     </div>
   )

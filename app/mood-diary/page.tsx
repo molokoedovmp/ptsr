@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import ProtectedRoute from '@/components/ProtectedRoute'
+import UserSidebar from '@/components/UserSidebar'
 import { Smile, Frown, Meh, TrendingUp, Calendar, Plus, Trash2 } from 'lucide-react'
 
 interface MoodEntry {
@@ -102,17 +103,23 @@ export default function MoodDiaryPage() {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="container-custom max-w-6xl">
-          {/* Заголовок */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Дневник настроения</h1>
-            <p className="text-gray-600 mt-2">
-              Отслеживайте своё эмоциональное состояние каждый день
-            </p>
-          </div>
+      <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-slate-100 py-12">
+        <div className="container-custom">
+          <div className="flex gap-6">
+            {/* Боковая панель */}
+            <UserSidebar />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Основной контент */}
+            <div className="flex-1">
+              {/* Заголовок */}
+              <div className="mb-8">
+                <h1 className="text-3xl font-bold text-gray-900">Дневник настроения</h1>
+                <p className="text-gray-600 mt-2">
+                  Отслеживайте своё эмоциональное состояние каждый день
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Форма добавления записи */}
             <div className="lg:col-span-2">
               <div className="card">
@@ -281,6 +288,8 @@ export default function MoodDiaryPage() {
                   </button>
                 </div>
               </div>
+            </div>
+          </div>
             </div>
           </div>
         </div>
