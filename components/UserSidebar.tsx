@@ -11,7 +11,8 @@ import {
   Heart, 
   Settings,
   LogOut,
-  Home
+  Home,
+  BarChart3
 } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 
@@ -29,6 +30,7 @@ export default function UserSidebar() {
   const navItems: NavItem[] = [
     { id: 'profile', label: 'Профиль', href: '/profile', icon: <User className="w-5 h-5" /> },
     { id: 'courses', label: 'Мои курсы', href: '/my-courses', icon: <BookOpen className="w-5 h-5" /> },
+    { id: 'analytics', label: 'Аналитика', href: '/analytics', icon: <BarChart3 className="w-5 h-5" /> },
     { id: 'diary', label: 'Дневник', href: '/diary', icon: <FileText className="w-5 h-5" /> },
     { id: 'mood', label: 'Дневник настроения', href: '/mood-diary', icon: <Heart className="w-5 h-5" /> },
     { id: 'certificates', label: 'Сертификаты', href: '/certificates', icon: <Award className="w-5 h-5" /> },
