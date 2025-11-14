@@ -14,7 +14,7 @@ interface Props {
 export default function BlockNoteViewer({ content }: Props) {
   const [isMounted, setIsMounted] = useState(false)
 
-  const initialBlocks = () => {
+  const parseContent = (content: string | null) => {
     if (!content) return undefined
     try {
       return JSON.parse(content)
@@ -28,10 +28,20 @@ export default function BlockNoteViewer({ content }: Props) {
   }, [])
 
   const editor = useCreateBlockNote({
-    initialContent: initialBlocks(),
+    initialContent: parseContent(content),
     dictionary: ru,
     editable: false,
   })
+
+  // Обновляем содержимое редактора при изменении content
+  useEffect(() => {
+    if (editor && content) {
+      const blocks = parseContent(content)
+      if (blocks) {
+        editor.replaceBlocks(editor.document, blocks)
+      }
+    }
+  }, [content, editor])
 
   if (!isMounted) {
     return (
