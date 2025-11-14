@@ -1,41 +1,27 @@
 services:
   postgres:
-    image: postgres:16-alpine
-    container_name: ptsr-postgres
+    image: postgres:16
     environment:
-      POSTGRES_USER: ptsr_user
-      POSTGRES_PASSWORD: ptsr_password
-      POSTGRES_DB: ptsr_db
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ptsr
     ports:
       - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ptsr_user"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
 
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: ptsr-app
+    build: .
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://ptsr_user:ptsr_password@postgres:5432/ptsr_db
-      NEXTAUTH_SECRET: ${NEXTAUTH_SECRET:-change-this-to-a-random-secret-key-in-production}
-      NEXTAUTH_URL: ${NEXTAUTH_URL:-http://localhost:3000}
-      EMAIL_HOST: ${EMAIL_HOST:-smtp.gmail.com}
-      EMAIL_PORT: ${EMAIL_PORT:-587}
+      DATABASE_URL: postgresql://postgres:postgres@postgres:5432/ptsr
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: your-secret-key-change-in-production
       EMAIL_USER: ${EMAIL_USER}
       EMAIL_PASSWORD: ${EMAIL_PASSWORD}
-      EMAIL_FROM: ${EMAIL_FROM:-noreply@example.com}
     depends_on:
-      postgres:
-        condition: service_healthy
-    command: sh -c "npx prisma migrate deploy && node server.js"
+      - postgres
 
 volumes:
   postgres_data:
