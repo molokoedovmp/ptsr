@@ -257,10 +257,49 @@ model CourseModule {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
-  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
 
   @@index([courseId, orderIndex])
   @@map("course_modules")
+}
+
+// Уроки в модулях
+model Lesson {
+  id          String   @id @default(cuid())
+  moduleId    String   @map("module_id")
+  title       String
+  description String?  @db.Text
+  content     String   @db.Text // JSON или HTML контент урока
+  videoUrl    String?  @map("video_url")
+  duration    Int?     // длительность в минутах
+  orderIndex  Int      @map("order_index")
+  isFree      Boolean  @default(false) @map("is_free") // бесплатный урок для предпросмотра
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  module           CourseModule     @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  lessonProgress   LessonProgress[]
+
+  @@index([moduleId, orderIndex])
+  @@map("lessons")
+}
+
+// Прогресс по урокам
+model LessonProgress {
+  id          String    @id @default(cuid())
+  userId      String    @map("user_id")
+  lessonId    String    @map("lesson_id")
+  completed   Boolean   @default(false)
+  completedAt DateTime? @map("completed_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+  updatedAt   DateTime  @updatedAt @map("updated_at")
+
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+  @@index([userId, completed])
+  @@map("lesson_progress")
 }
 
 // Записи на курсы

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import Link from 'next/link'
 import { BookOpen, Clock, Award, CheckCircle, ArrowLeft, Users, Target, Calendar } from 'lucide-react'
 
@@ -29,15 +30,21 @@ interface Course {
 export default function CoursePage() {
   const params = useParams()
   const router = useRouter()
+  const { data: session } = useSession()
   const [course, setCourse] = useState<Course | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [isEnrolled, setIsEnrolled] = useState(false)
+  const [enrolling, setEnrolling] = useState(false)
 
   useEffect(() => {
     if (params.slug) {
       fetchCourse()
+      if (session) {
+        checkEnrollment()
+      }
     }
-  }, [params.slug])
+  }, [params.slug, session])
 
   const fetchCourse = async () => {
     try {
@@ -55,6 +62,50 @@ export default function CoursePage() {
       setError(true)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const checkEnrollment = async () => {
+    try {
+      const response = await fetch('/api/user/enrollments')
+      if (response.ok) {
+        const data = await response.json()
+        const enrolled = data.enrollments.some((e: any) => e.course.slug === params.slug)
+        setIsEnrolled(enrolled)
+      }
+    } catch (error) {
+      console.error('Error checking enrollment:', error)
+    }
+  }
+
+  const handleEnroll = async () => {
+    if (!session) {
+      router.push('/login?redirect=' + encodeURIComponent(window.location.pathname))
+      return
+    }
+
+    if (!course) return
+
+    setEnrolling(true)
+    try {
+      const response = await fetch(`/api/enrollments/${course.id}`, {
+        method: 'POST',
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        alert('Вы успешно записались на курс!')
+        setIsEnrolled(true)
+        router.push('/my-courses')
+      } else {
+        alert(data.error || 'Ошибка записи на курс')
+      }
+    } catch (error) {
+      console.error('Error enrolling:', error)
+      alert('Ошибка записи на курс')
+    } finally {
+      setEnrolling(false)
     }
   }
 
@@ -207,14 +258,36 @@ export default function CoursePage() {
                   <div className="mb-6">
                     <p className="text-sm text-slate-600 mb-2">Стоимость программы</p>
                     <p className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
-                      {course.price.toLocaleString()}₽
+                      {course.price === 0 ? 'Бесплатно' : `${course.price.toLocaleString()}₽`}
                     </p>
                   </div>
 
-                  <button className="w-full bg-gradient-to-r from-brand-teal to-brand-blue text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 mb-6 flex items-center justify-center gap-2">
-                    <Award className="w-5 h-5" />
-                    Записаться на курс
-                  </button>
+                  {isEnrolled ? (
+                    <Link
+                      href="/my-courses"
+                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 mb-6 flex items-center justify-center gap-2"
+                    >
+                      <CheckCircle className="w-5 h-5" />
+                      Вы записаны на курс
+                    </Link>
+                  ) : course.price === 0 ? (
+                    <button
+                      onClick={handleEnroll}
+                      disabled={enrolling}
+                      className="w-full bg-gradient-to-r from-brand-teal to-brand-blue text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 mb-6 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Award className="w-5 h-5" />
+                      {enrolling ? 'Записываемся...' : 'Записаться бесплатно'}
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => alert('Платные курсы скоро будут доступны')}
+                      className="w-full bg-gradient-to-r from-brand-teal to-brand-blue text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 mb-6 flex items-center justify-center gap-2"
+                    >
+                      <Award className="w-5 h-5" />
+                      Записаться на курс
+                    </button>
+                  )}
 
                   <div className="space-y-4 mb-6">
                     <h3 className="font-semibold text-slate-900 text-lg mb-4">Что включено:</h3>

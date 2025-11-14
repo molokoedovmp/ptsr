@@ -157,6 +157,13 @@ export default function AdminCoursesPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex items-center justify-end space-x-2">
+                          <Link 
+                            href={`/admin/courses/${course.id}/lessons`} 
+                            className="text-purple-600 hover:text-purple-800"
+                            title="Управление уроками"
+                          >
+                            <BookOpen className="w-5 h-5" />
+                          </Link>
                           <Link href={`/admin/courses/${course.id}/edit`} className="text-brand-teal hover:text-brand-teal/80">
                             <Edit className="w-5 h-5" />
                           </Link>

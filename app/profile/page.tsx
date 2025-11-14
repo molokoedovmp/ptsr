@@ -1,15 +1,57 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import { useAuth } from '@/contexts/AuthContext'
-import { User, Mail, Phone, Calendar, BookOpen, Award, CreditCard, Settings } from 'lucide-react'
+import { User, Mail, Phone, Calendar, BookOpen, Award, CreditCard, Settings, ArrowRight, Clock } from 'lucide-react'
+
+interface Enrollment {
+  id: string
+  progress: number
+  completed: boolean
+  course: {
+    id: string
+    title: string
+    slug: string
+    description: string
+    durationWeeks: number
+    level: string
+    coverImage: string | null
+    _count: {
+      modules: number
+    }
+  }
+}
 
 export default function ProfilePage() {
   const { user } = useAuth()
   const router = useRouter()
   const [activeTab, setActiveTab] = useState('profile')
+  const [enrollments, setEnrollments] = useState<Enrollment[]>([])
+  const [loadingCourses, setLoadingCourses] = useState(false)
+
+  useEffect(() => {
+    if (activeTab === 'courses') {
+      fetchEnrollments()
+    }
+  }, [activeTab])
+
+  const fetchEnrollments = async () => {
+    setLoadingCourses(true)
+    try {
+      const response = await fetch('/api/user/enrollments')
+      if (response.ok) {
+        const data = await response.json()
+        setEnrollments(data.enrollments)
+      }
+    } catch (error) {
+      console.error('Error fetching enrollments:', error)
+    } finally {
+      setLoadingCourses(false)
+    }
+  }
 
   const tabs = [
     { id: 'profile', label: 'Информация о профиле', icon: <User className="w-5 h-5" /> },
@@ -98,7 +140,7 @@ export default function ProfilePage() {
             </button>
 
             <button 
-              onClick={() => router.push('/programs')}
+              onClick={() => router.push('/my-courses')}
               className="card hover:shadow-xl transition-shadow text-left hover:border-purple-600"
             >
               <div className="flex items-center space-x-4">
@@ -181,18 +223,103 @@ export default function ProfilePage() {
               )}
 
               {activeTab === 'courses' && (
-                <div className="text-center py-12">
-                  <BookOpen className="w-16 h-16 text-slate-400 mx-auto mb-4" />
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">
-                    У вас пока нет активных курсов
-                  </h3>
-                  <p className="text-slate-600 mb-6">
-                    Начните свой путь восстановления с одной из наших программ
-                  </p>
-                  <button className="bg-brand-teal text-white px-6 py-3 rounded-lg font-medium hover:bg-brand-teal/90 transition-colors">
-                    Посмотреть программы
-                  </button>
-                </div>
+                <>
+                  {loadingCourses ? (
+                    <div className="flex items-center justify-center py-12">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-teal"></div>
+                    </div>
+                  ) : enrollments.length === 0 ? (
+                    <div className="text-center py-12">
+                      <BookOpen className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+                      <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                        У вас пока нет активных курсов
+                      </h3>
+                      <p className="text-slate-600 mb-6">
+                        Начните свой путь восстановления с одной из наших программ
+                      </p>
+                      <Link
+                        href="/programs"
+                        className="inline-block bg-brand-teal text-white px-6 py-3 rounded-lg font-medium hover:bg-brand-teal/90 transition-colors"
+                      >
+                        Посмотреть программы
+                      </Link>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {enrollments.map((enrollment) => (
+                        <div
+                          key={enrollment.id}
+                          className="bg-slate-50 rounded-lg p-6 hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <h3 className="text-lg font-semibold text-slate-900 mb-2">
+                                {enrollment.course.title}
+                              </h3>
+                              <p className="text-slate-600 text-sm mb-4">
+                                {enrollment.course.description}
+                              </p>
+                              
+                              <div className="flex flex-wrap gap-3 mb-4">
+                                <div className="flex items-center text-sm text-slate-600">
+                                  <Clock className="w-4 h-4 mr-1" />
+                                  {enrollment.course.durationWeeks} недель
+                                </div>
+                                <div className="flex items-center text-sm text-slate-600">
+                                  <BookOpen className="w-4 h-4 mr-1" />
+                                  {enrollment.course._count.modules} модулей
+                                </div>
+                                <span className="px-2 py-1 bg-teal-100 text-teal-700 text-xs font-medium rounded">
+                                  {enrollment.course.level}
+                                </span>
+                              </div>
+
+                              {/* Прогресс */}
+                              <div className="mb-4">
+                                <div className="flex items-center justify-between text-sm mb-2">
+                                  <span className="text-slate-600">Прогресс</span>
+                                  <span className="font-semibold text-slate-900">{enrollment.progress}%</span>
+                                </div>
+                                <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                                  <div
+                                    className="h-full bg-brand-teal transition-all"
+                                    style={{ width: `${enrollment.progress}%` }}
+                                  />
+                                </div>
+                              </div>
+
+                              <Link
+                                href={`/learn/${enrollment.course.slug}`}
+                                className="inline-flex items-center text-brand-teal hover:text-brand-teal/80 font-medium"
+                              >
+                                Продолжить обучение
+                                <ArrowRight className="w-4 h-4 ml-2" />
+                              </Link>
+                            </div>
+
+                            {enrollment.course.coverImage && (
+                              <img
+                                src={enrollment.course.coverImage}
+                                alt={enrollment.course.title}
+                                className="w-32 h-32 object-cover rounded-lg flex-shrink-0"
+                              />
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                      
+                      <div className="text-center pt-4">
+                        <Link
+                          href="/my-courses"
+                          className="inline-flex items-center text-brand-teal hover:text-brand-teal/80 font-medium"
+                        >
+                          Посмотреть все курсы
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </Link>
+                      </div>
+                    </div>
+                  )}
+                </>
               )}
 
               {activeTab === 'certificates' && (

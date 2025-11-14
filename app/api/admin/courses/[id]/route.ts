@@ -26,15 +26,88 @@ export async function GET(
 
     const course = await prisma.course.findUnique({
       where: { id: params.id },
+      include: {
+        modules: {
+          orderBy: { orderIndex: 'asc' },
+        },
+      },
     })
 
     if (!course) {
       return NextResponse.json({ error: 'Course not found' }, { status: 404 })
     }
 
-    return NextResponse.json({ course })
+    return NextResponse.json(course)
   } catch (error) {
     console.error('Error fetching course:', error)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(authOptions)
+
+    if (!session?.user) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { roles: true },
+    })
+
+    if (!user?.roles.includes(UserRole.ADMIN)) {
+      return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
+    }
+
+    const data = await request.json()
+
+    // Обновляем курс и модули транзакцией
+    const course = await prisma.$transaction(async (tx) => {
+      // Удаляем старые модули
+      await tx.courseModule.deleteMany({
+        where: { courseId: params.id },
+      })
+
+      // Обновляем курс
+      const updatedCourse = await tx.course.update({
+        where: { id: params.id },
+        data: {
+          title: data.title,
+          slug: data.slug,
+          description: data.description,
+          fullDescription: data.fullDescription,
+          price: data.price,
+          durationWeeks: data.durationWeeks,
+          level: data.level,
+          coverImage: data.coverImage || null,
+          published: data.published,
+        },
+      })
+
+      // Создаем новые модули
+      if (data.modules && data.modules.length > 0) {
+        await tx.courseModule.createMany({
+          data: data.modules.map((module: any, index: number) => ({
+            courseId: params.id,
+            title: module.title,
+            description: module.description,
+            content: module.content,
+            orderIndex: index,
+          })),
+        })
+      }
+
+      return updatedCourse
+    })
+
+    return NextResponse.json(course)
+  } catch (error) {
+    console.error('Error updating course:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
