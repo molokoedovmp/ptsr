@@ -40,7 +40,7 @@ export default function UserSidebar() {
   }
 
   return (
-    <div className="w-64 bg-white rounded-2xl shadow-lg p-6 sticky top-6 h-fit">
+    <div className="w-64 bg-white rounded-2xl shadow-lg p-6 sticky top-20 h-fit z-40">
       {/* Профиль пользователя */}
       <div className="mb-6 pb-6 border-b border-slate-200">
         <div className="flex items-center space-x-3">
