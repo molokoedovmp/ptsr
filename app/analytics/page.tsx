@@ -199,13 +199,13 @@ export default function AnalyticsPage() {
                       <div className="absolute inset-0 flex items-end justify-between px-1">
                         {data.charts.diaryByDay.map((day, index) => {
                           const maxCount = Math.max(...data.charts.diaryByDay.map(d => d.count), 1)
-                          const heightPercent = day.count > 0 ? Math.max((day.count / maxCount) * 100, 8) : 0
+                          const heightPercent = day.count > 0 ? Math.max((day.count / maxCount) * 100, 25) : 0
                           return (
                             <div key={index} className="flex-1 flex items-end justify-center group relative px-0.5">
                               {day.count > 0 ? (
                                 <div
                                   className="w-full bg-gradient-to-t from-brand-teal to-teal-400 rounded-t-sm transition-all group-hover:from-brand-teal/80 group-hover:to-teal-300 cursor-pointer shadow-sm"
-                                  style={{ height: `${heightPercent}%`, minHeight: '8px' }}
+                                  style={{ height: `${heightPercent}%`, minHeight: '24px' }}
                                 />
                               ) : (
                                 <div className="w-full h-1 bg-gray-200 rounded-full"></div>
@@ -235,13 +235,13 @@ export default function AnalyticsPage() {
                       <div className="relative h-48 border-b-2 border-l-2 border-gray-300 mb-6">
                         <div className="absolute inset-0 flex items-end justify-between px-1">
                           {data.charts.moodByDay.map((day, index) => {
-                            const heightPercent = day.average ? Math.max((day.average / 5) * 100, 12) : 0
+                            const heightPercent = day.average ? Math.max((day.average / 5) * 100, 25) : 0
                             return (
                               <div key={index} className="flex-1 flex items-end justify-center group relative px-0.5">
                                 {day.average ? (
                                   <div
                                     className={`w-full rounded-t-sm transition-all group-hover:opacity-90 cursor-pointer shadow-sm ${getMoodColor(day.average)}`}
-                                    style={{ height: `${heightPercent}%`, minHeight: '12px' }}
+                                    style={{ height: `${heightPercent}%`, minHeight: '30px' }}
                                   />
                                 ) : (
                                   <div className="w-full h-1 bg-gray-200 rounded-full"></div>
