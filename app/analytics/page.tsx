@@ -52,7 +52,10 @@ export default function AnalyticsPage() {
       const response = await fetch('/api/user/analytics')
       if (response.ok) {
         const analyticsData = await response.json()
+        console.log('Analytics data:', analyticsData)
         setData(analyticsData)
+      } else {
+        console.error('Failed to fetch analytics:', response.status)
       }
     } catch (error) {
       console.error('Error:', error)
@@ -191,30 +194,35 @@ export default function AnalyticsPage() {
                   <h3 className="text-lg font-bold text-gray-900 mb-4">
                     Активность ведения дневника (30 дней)
                   </h3>
-                  <div className="relative h-48 border-b border-l border-gray-200">
-                    <div className="absolute inset-0 flex items-end justify-between px-2 gap-1">
-                      {data?.charts.diaryByDay.map((day, index) => {
-                        const maxCount = Math.max(...(data?.charts.diaryByDay.map(d => d.count) || [1]))
-                        const height = day.count > 0 ? Math.max((day.count / maxCount) * 100, 5) : 0
-                        return (
-                          <div key={index} className="flex-1 flex flex-col items-center group relative" style={{ maxWidth: '20px' }}>
-                            {day.count > 0 && (
-                              <div
-                                className="w-full bg-brand-teal rounded-t transition-all group-hover:bg-brand-teal/80 cursor-pointer"
-                                style={{ height: `${height}%` }}
-                              />
-                            )}
-                            {day.count === 0 && (
-                              <div className="w-full h-1 bg-gray-200 rounded"></div>
-                            )}
-                            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
-                              {new Date(day.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}: {day.count}
+                  {data && data.charts && data.charts.diaryByDay && data.charts.diaryByDay.length > 0 ? (
+                    <div className="relative h-48 border-b-2 border-l-2 border-gray-300">
+                      <div className="absolute inset-0 flex items-end justify-between px-1">
+                        {data.charts.diaryByDay.map((day, index) => {
+                          const maxCount = Math.max(...data.charts.diaryByDay.map(d => d.count), 1)
+                          const heightPercent = day.count > 0 ? Math.max((day.count / maxCount) * 100, 8) : 0
+                          return (
+                            <div key={index} className="flex-1 flex items-end justify-center group relative px-0.5">
+                              {day.count > 0 ? (
+                                <div
+                                  className="w-full bg-gradient-to-t from-brand-teal to-teal-400 rounded-t-sm transition-all group-hover:from-brand-teal/80 group-hover:to-teal-300 cursor-pointer shadow-sm"
+                                  style={{ height: `${heightPercent}%`, minHeight: '8px' }}
+                                />
+                              ) : (
+                                <div className="w-full h-1 bg-gray-200 rounded-full"></div>
+                              )}
+                              <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-20 pointer-events-none">
+                                {new Date(day.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}: {day.count}
+                              </div>
                             </div>
-                          </div>
-                        )
-                      })}
+                          )
+                        })}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    <div className="h-48 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
+                      <p className="text-gray-500">Нет данных для отображения</p>
+                    </div>
+                  )}
                 </div>
 
                 {/* График настроения */}
@@ -222,42 +230,50 @@ export default function AnalyticsPage() {
                   <h3 className="text-lg font-bold text-gray-900 mb-4">
                     Динамика настроения (30 дней)
                   </h3>
-                  <div className="relative h-48 border-b border-l border-gray-200 mb-6">
-                    <div className="absolute inset-0 flex items-end justify-between px-2 gap-1">
-                      {data?.charts.moodByDay.map((day, index) => {
-                        const height = day.average ? Math.max((day.average / 5) * 100, 10) : 0
-                        return (
-                          <div key={index} className="flex-1 flex flex-col items-center group relative" style={{ maxWidth: '20px' }}>
-                            {day.average ? (
-                              <div
-                                className={`w-full rounded-t transition-all group-hover:opacity-80 cursor-pointer ${getMoodColor(day.average)}`}
-                                style={{ height: `${height}%` }}
-                              />
-                            ) : (
-                              <div className="w-full h-1 bg-gray-200 rounded"></div>
-                            )}
-                            <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-10">
-                              {new Date(day.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}: {day.average?.toFixed(1) || 'нет данных'}
-                            </div>
-                          </div>
-                        )
-                      })}
+                  {data && data.charts && data.charts.moodByDay && data.charts.moodByDay.length > 0 ? (
+                    <>
+                      <div className="relative h-48 border-b-2 border-l-2 border-gray-300 mb-6">
+                        <div className="absolute inset-0 flex items-end justify-between px-1">
+                          {data.charts.moodByDay.map((day, index) => {
+                            const heightPercent = day.average ? Math.max((day.average / 5) * 100, 12) : 0
+                            return (
+                              <div key={index} className="flex-1 flex items-end justify-center group relative px-0.5">
+                                {day.average ? (
+                                  <div
+                                    className={`w-full rounded-t-sm transition-all group-hover:opacity-90 cursor-pointer shadow-sm ${getMoodColor(day.average)}`}
+                                    style={{ height: `${heightPercent}%`, minHeight: '12px' }}
+                                  />
+                                ) : (
+                                  <div className="w-full h-1 bg-gray-200 rounded-full"></div>
+                                )}
+                                <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-20 pointer-events-none">
+                                  {new Date(day.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}: {day.average ? `${getMoodEmoji(day.average)} ${day.average.toFixed(1)}` : 'нет данных'}
+                                </div>
+                              </div>
+                            )
+                          })}
+                        </div>
+                      </div>
+                      <div className="flex items-center justify-center gap-4 text-xs">
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-red-500 rounded"></div>
+                          <span>Плохо</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-yellow-500 rounded"></div>
+                          <span>Нормально</span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <div className="w-3 h-3 bg-green-500 rounded"></div>
+                          <span>Отлично</span>
+                        </div>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="h-48 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg mb-6">
+                      <p className="text-gray-500">Нет данных для отображения</p>
                     </div>
-                  </div>
-                  <div className="flex items-center justify-center gap-4 text-xs">
-                    <div className="flex items-center gap-1">
-                      <div className="w-3 h-3 bg-red-500 rounded"></div>
-                      <span>Плохо</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                      <span>Нормально</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <div className="w-3 h-3 bg-green-500 rounded"></div>
-                      <span>Отлично</span>
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
 
