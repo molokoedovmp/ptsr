@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { BookOpen, Clock, Award, CheckCircle, ArrowLeft, Users, Target, Calendar } from 'lucide-react'
 
 interface Module {
@@ -169,8 +170,15 @@ export default function CoursePage() {
             {/* Заголовок */}
             <div className="animate-fade-in">
               {course.coverImage && (
-                <div className="mb-8 rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                  <img src={course.coverImage} alt={course.title} className="w-full h-96 object-cover" />
+                <div className="relative mb-8 rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 h-96 bg-gray-100">
+                  <Image 
+                    src={course.coverImage} 
+                    alt={course.title} 
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
+                    priority
+                  />
                 </div>
               )}
               

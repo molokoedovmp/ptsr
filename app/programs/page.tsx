@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { BookOpen, Clock, Award, CheckCircle, ArrowRight, Star, Users, TrendingUp } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
 
 interface Course {
   id: string
@@ -147,12 +148,14 @@ export default function ProgramsPage() {
                   style={{ animationDelay: `${index * 0.1}s` }}
                 >
                   {/* Изображение программы */}
-                  <div className="relative h-56 overflow-hidden">
+                  <div className="relative h-56 overflow-hidden bg-gray-100">
                     {program.coverImage ? (
-                      <img 
+                      <Image 
                         src={program.coverImage} 
-                        alt={program.title} 
-                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                        alt={program.title}
+                        fill
+                        className="object-cover group-hover:scale-110 transition-transform duration-500"
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                       />
                     ) : (
                       <div className="w-full h-full bg-gradient-to-br from-teal-400 to-blue-500 flex items-center justify-center">
