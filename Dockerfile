@@ -13,6 +13,7 @@ COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 ENV PRISMA_CLI_BINARY_TARGETS=debian-openssl-3.0.x
+ENV DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy"
 
 RUN npx prisma generate && npm run build
 
