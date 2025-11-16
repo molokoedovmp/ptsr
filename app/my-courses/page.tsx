@@ -12,6 +12,7 @@ interface Enrollment {
   progress: number
   completed: boolean
   enrolledAt: string
+  certificateUrl: string | null
   course: {
     id: string
     title: string
@@ -268,13 +269,26 @@ export default function MyCoursesPage() {
                           {enrollment.course.description}
                         </p>
 
-                        <Link
-                          href={`/programs/${enrollment.course.slug}`}
-                          className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all"
-                        >
-                          <Award className="w-5 h-5" />
-                          <span>Посмотреть сертификат</span>
-                        </Link>
+                        {enrollment.certificateUrl ? (
+                          <a
+                            href={enrollment.certificateUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl font-semibold hover:shadow-lg transform hover:scale-105 transition-all"
+                          >
+                            <Award className="w-5 h-5" />
+                            <span>Посмотреть сертификат</span>
+                          </a>
+                        ) : (
+                          <button
+                            disabled
+                            className="w-full flex items-center justify-center space-x-2 bg-gray-300 text-gray-500 px-6 py-3 rounded-xl font-semibold cursor-not-allowed"
+                            title="Сертификат будет доступен в ближайшее время"
+                          >
+                            <Award className="w-5 h-5" />
+                            <span>Сертификат готовится</span>
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
