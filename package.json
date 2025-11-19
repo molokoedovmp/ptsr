@@ -21,7 +21,6 @@
     "@react-pdf/renderer": "^4.3.1",
     "@types/nodemailer": "^7.0.3",
     "bcryptjs": "^2.4.3",
-    "canvas": "^3.2.0",
     "clsx": "^2.1.1",
     "date-fns": "^3.3.1",
     "lucide-react": "^0.344.0",
