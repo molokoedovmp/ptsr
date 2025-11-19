@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useSession } from 'next-auth/react'
+import Link from 'next/link'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import UserSidebar from '@/components/UserSidebar'
 import BlockNoteEditor from '@/components/editor/BlockNoteEditor'
@@ -16,12 +16,19 @@ interface DiaryEntry {
   createdAt: string
 }
 
+interface ActivityLog {
+  id: string
+  path: string
+  title: string | null
+  createdAt: string
+}
+
 export default function DiaryPage() {
-  const { data: session } = useSession()
   const [title, setTitle] = useState('')
   const [content, setContent] = useState('')
   const [activityType, setActivityType] = useState('')
   const [entries, setEntries] = useState<DiaryEntry[]>([])
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [selectedEntry, setSelectedEntry] = useState<DiaryEntry | null>(null)
@@ -30,7 +37,20 @@ export default function DiaryPage() {
 
   useEffect(() => {
     fetchEntries()
+    fetchActivityLogs()
   }, [])
+
+  const fetchActivityLogs = async () => {
+    try {
+      const response = await fetch('/api/user/activity-log')
+      if (response.ok) {
+        const data = await response.json()
+        setActivityLogs(data.logs || [])
+      }
+    } catch (error) {
+      console.error('Error:', error)
+    }
+  }
 
   const fetchEntries = async () => {
     try {
@@ -171,86 +191,7 @@ export default function DiaryPage() {
                 </button>
               </div>
 
-              {/* Список записей */}
-              <div className="bg-white rounded-2xl shadow-lg p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <h2 className="text-xl font-bold text-gray-900 flex items-center">
-                    <BookOpen className="w-6 h-6 mr-2 text-brand-teal" />
-                    Ваши записи ({entries.length})
-                  </h2>
-                </div>
-
-                {loading ? (
-                  <div className="text-center py-12">
-                    <div className="animate-spin w-12 h-12 border-4 border-brand-teal border-t-transparent rounded-full mx-auto"></div>
-                    <p className="text-gray-600 mt-4">Загрузка записей...</p>
-                  </div>
-                ) : entries.length === 0 ? (
-                  <div className="text-center py-12">
-                    <BookOpen className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-                    <p className="text-gray-600 mb-4">У вас пока нет записей</p>
-                    <button
-                      onClick={() => setShowCreateForm(true)}
-                      className="btn-primary"
-                    >
-                      Создать первую запись
-                    </button>
-                  </div>
-                ) : (
-                  <div className="space-y-4">
-                    {entries.map((entry) => (
-                      <div
-                        key={entry.id}
-                        className="border border-gray-200 rounded-lg p-4 hover:border-brand-teal transition-colors"
-                      >
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <h3 
-                              className="font-semibold text-gray-900 text-lg cursor-pointer hover:text-brand-teal"
-                              onClick={() => setSelectedEntry(entry)}
-                            >
-                              {entry.title}
-                            </h3>
-                            <div className="flex items-center gap-3 mt-2">
-                              <span className="text-sm text-gray-500 flex items-center">
-                                <Calendar className="w-4 h-4 mr-1" />
-                                {new Date(entry.createdAt).toLocaleString('ru-RU', {
-                                  year: 'numeric',
-                                  month: 'long',
-                                  day: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
-                              {entry.activityType && (
-                                <span className="px-2 py-1 bg-brand-teal/10 text-brand-teal text-xs font-medium rounded">
-                                  {getActivityTypeLabel(entry.activityType)}
-                                </span>
-                              )}
-                            </div>
-                          </div>
-                          <div className="flex items-center space-x-2 ml-4">
-                            <button
-                              onClick={() => startEdit(entry)}
-                              className="p-2 hover:bg-blue-50 rounded text-blue-600"
-                              title="Редактировать"
-                            >
-                              <Edit className="w-4 h-4" />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(entry.id)}
-                              className="p-2 hover:bg-red-50 rounded text-red-600"
-                              title="Удалить"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+              
             </div>
           </div>
 

@@ -26,15 +26,17 @@ export default function Navigation() {
   }
 
   return (
-    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95">
+    <nav className="bg-white border-b border-slate-200 sticky top-0 z-50 backdrop-blur-sm bg-white/95 font-heading">
       <div className="container-custom">
         <div className="flex justify-between items-center h-16">
           {/* Логотип */}
-          <Link href="/" className="flex items-center space-x-2">
+          <Link href="/" className="flex items-center space-x-3">
             <div className="w-10 h-10 bg-brand-teal rounded-lg flex items-center justify-center">
               <span className="text-white font-bold text-xl">П</span>
             </div>
-            <span className="text-xl font-heading font-bold text-brand-dark">ПТСР Эксперт</span>
+            
+              <span>ПТСР-Эксперт</span>
+            
           </Link>
 
           {/* Десктопное меню */}

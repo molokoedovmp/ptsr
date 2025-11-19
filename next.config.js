@@ -38,6 +38,14 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'imgur.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'trener-ptsr.lovable.app',
+      },
+      {
+        protocol: 'https',
+        hostname: 'akobr.ru',
+      },
     ],
   },
   experimental: {
@@ -46,4 +54,3 @@ const nextConfig = {
 }
 
 module.exports = nextConfig
-

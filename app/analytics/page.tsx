@@ -1,16 +1,17 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo, ChangeEvent } from 'react'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import UserSidebar from '@/components/UserSidebar'
-import { 
-  TrendingUp, 
-  BookOpen, 
-  Heart, 
+import Link from 'next/link'
+import {
+  TrendingUp,
+  BookOpen,
+  Heart,
   Award,
   Calendar,
   Activity,
-  BarChart3
+  BarChart3,
 } from 'lucide-react'
 
 interface AnalyticsData {
@@ -39,13 +40,59 @@ interface AnalyticsData {
   }
 }
 
+interface ActivityLog {
+  id: string
+  action: string
+  metadata?: {
+    path?: string
+    title?: string
+    [key: string]: any
+  } | null
+  createdAt: string
+}
+
+const ACTIVITY_PREVIEW_COUNT = 3
+
 export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null)
   const [loading, setLoading] = useState(true)
+  const [activityLogs, setActivityLogs] = useState<ActivityLog[]>([])
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [expandedDates, setExpandedDates] = useState<Record<string, boolean>>({})
+
+  const fetchActivityLogs = async () => {
+    try {
+      const response = await fetch('/api/user/activity-log')
+      if (response.ok) {
+        const activityData = await response.json()
+        setActivityLogs(activityData.logs || [])
+      } else {
+        console.error('Failed to fetch activity logs:', response.status)
+      }
+    } catch (error) {
+      console.error('Error fetching activity logs:', error)
+    }
+  }
 
   useEffect(() => {
     fetchAnalytics()
+    fetchActivityLogs()
   }, [])
+
+  const logsGroupedByDate = useMemo(() => {
+    return activityLogs.reduce<Record<string, ActivityLog[]>>((acc, log) => {
+      const dateKey = new Date(log.createdAt).toISOString().split('T')[0]
+      if (!acc[dateKey]) acc[dateKey] = []
+      acc[dateKey].push(log)
+      return acc
+    }, {})
+  }, [activityLogs])
+
+  const sortedDates = useMemo(() => Object.keys(logsGroupedByDate).sort((a, b) => (a < b ? 1 : -1)), [logsGroupedByDate])
+  const displayedDates = useMemo(
+    () => (selectedDate ? sortedDates.filter((date) => date === selectedDate) : sortedDates),
+    [selectedDate, sortedDates],
+  )
 
   const fetchAnalytics = async () => {
     try {
@@ -64,14 +111,6 @@ export default function AnalyticsPage() {
     }
   }
 
-  const getMoodColor = (level: number) => {
-    if (level >= 4.5) return 'bg-green-500'
-    if (level >= 3.5) return 'bg-lime-500'
-    if (level >= 2.5) return 'bg-yellow-500'
-    if (level >= 1.5) return 'bg-orange-500'
-    return 'bg-red-500'
-  }
-
   const getMoodEmoji = (level: number) => {
     if (level >= 4.5) return '😊'
     if (level >= 3.5) return '🙂'
@@ -80,14 +119,47 @@ export default function AnalyticsPage() {
     return '😢'
   }
 
-  const activityTypeLabels: Record<string, string> = {
-    activity: 'Активность',
-    practice: 'Практика',
-    social: 'Социальное',
-    reflection: 'Рефлексия',
-    therapy: 'Терапия',
-    other: 'Другое',
+  const formatLogTitle = (log: ActivityLog) => {
+    const rawTitle = typeof log.metadata?.title === 'string' ? log.metadata.title.trim() : undefined
+    const metaTitle = rawTitle && rawTitle.length > 0 ? rawTitle : undefined
+    const metaPath = typeof log.metadata?.path === 'string' ? log.metadata.path : ''
+    const withTitle = (base: string) => (metaTitle ? `${base} "${metaTitle}"` : base)
+
+    if (metaPath.startsWith('/articles/')) return withTitle('Открыли статью')
+    if (metaPath.startsWith('/resources')) return withTitle('Изучили материал')
+    if (metaPath.startsWith('/programs/')) return withTitle('Просмотрели программу')
+    if (metaPath.startsWith('/programs')) return 'Каталог программ'
+    if (metaPath.startsWith('/diary')) return 'Дневник активности'
+    if (metaPath.startsWith('/mood-diary')) return 'Дневник настроения'
+    if (metaPath.startsWith('/my-courses')) return 'Мои курсы'
+    if (metaTitle) return metaTitle
+    if (metaPath) return `Страница ${metaPath}`
+    return log.action || 'Действие'
   }
+
+  const formatDateLabel = (value: string) =>
+    new Date(value).toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', year: 'numeric' })
+
+  const handleDateChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const value = event.target.value
+    setSelectedDate(value || null)
+  }
+
+  useEffect(() => {
+    if (selectedDate && !logsGroupedByDate[selectedDate]) {
+      setSelectedDate(null)
+    }
+  }, [logsGroupedByDate, selectedDate])
+
+  const toggleDateVisibility = (date: string) => {
+    setExpandedDates((prev) => ({
+      ...prev,
+      [date]: !prev[date],
+    }))
+  }
+
+  const moodAverage = data?.moodStats?.average ?? 0
+  const averageProgress = data?.courseStats?.averageProgress ?? 0
 
   if (loading) {
     return (
@@ -117,7 +189,7 @@ export default function AnalyticsPage() {
               <div className="mb-8">
                 <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
                   <BarChart3 className="w-8 h-8 text-brand-teal" />
-                  Моя аналитика
+                  Журнал активности
                 </h1>
                 <p className="text-gray-600 mt-2">
                   Отслеживайте свой прогресс и динамику изменений
@@ -145,10 +217,10 @@ export default function AnalyticsPage() {
                     <div className="w-12 h-12 bg-pink-100 rounded-lg flex items-center justify-center">
                       <Heart className="w-6 h-6 text-pink-600" />
                     </div>
-                    <span className="text-2xl">{getMoodEmoji(data?.moodStats.average || 0)}</span>
+                    <span className="text-2xl">{getMoodEmoji(moodAverage)}</span>
                   </div>
                   <div className="text-3xl font-bold text-gray-900 mb-1">
-                    {data?.moodStats.average.toFixed(1) || 0}/5
+                    {moodAverage.toFixed(1)}/5
                   </div>
                   <div className="text-sm text-gray-600">Среднее настроение</div>
                   <div className="text-xs text-gray-500 mt-2">
@@ -178,7 +250,7 @@ export default function AnalyticsPage() {
                     <Calendar className="w-5 h-5 text-gray-600" />
                   </div>
                   <div className="text-3xl font-bold text-gray-900 mb-1">
-                    {data?.courseStats.averageProgress.toFixed(0) || 0}%
+                    {Math.round(averageProgress)}%
                   </div>
                   <div className="text-sm text-gray-600">Средний прогресс</div>
                   <div className="text-xs text-gray-500 mt-2">
@@ -187,165 +259,83 @@ export default function AnalyticsPage() {
                 </div>
               </div>
 
-              {/* Графики */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                {/* График активности дневника */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">
-                    Активность ведения дневника (30 дней)
-                  </h3>
-                  {data && data.charts && data.charts.diaryByDay && data.charts.diaryByDay.length > 0 ? (
-                    <div className="relative h-48 border-b-2 border-l-2 border-gray-300">
-                      <div className="absolute inset-0 flex items-end justify-between px-1">
-                        {data.charts.diaryByDay.map((day, index) => {
-                          const maxCount = Math.max(...data.charts.diaryByDay.map(d => d.count), 1)
-                          const heightPercent = day.count > 0 ? Math.max((day.count / maxCount) * 100, 25) : 0
-                          return (
-                            <div key={index} className="flex-1 flex items-end justify-center group relative px-0.5">
-                              {day.count > 0 ? (
-                                <div
-                                  className="w-full bg-gradient-to-t from-brand-teal to-teal-400 rounded-t-sm transition-all group-hover:from-brand-teal/80 group-hover:to-teal-300 cursor-pointer shadow-sm"
-                                  style={{ height: `${heightPercent}%`, minHeight: '24px' }}
-                                />
-                              ) : (
-                                <div className="w-full h-1 bg-gray-200 rounded-full"></div>
-                              )}
-                              <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-20 pointer-events-none">
-                                {new Date(day.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}: {day.count}
-                              </div>
-                            </div>
-                          )
-                        })}
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="h-48 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg">
-                      <p className="text-gray-500">Нет данных для отображения</p>
+              {/* Журнал активности */}
+              <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+                  <div>
+                    <h3 className="text-lg font-bold text-gray-900">Журнал активности</h3>
+                    <p className="text-sm text-gray-500">Показывает страницы, которые вы посещали в аккаунте</p>
+                  </div>
+                  {sortedDates.length > 0 && (
+                    <div className="flex items-center gap-2">
+                      <label htmlFor="activity-date" className="text-sm text-gray-500">
+                        Выбор дня:
+                      </label>
+                      <select
+                        id="activity-date"
+                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-brand-teal"
+                        value={selectedDate || ''}
+                        onChange={handleDateChange}
+                      >
+                        <option value="">Все дни</option>
+                        {sortedDates.map((date) => (
+                          <option key={date} value={date}>
+                            {formatDateLabel(date)}
+                          </option>
+                        ))}
+                      </select>
                     </div>
                   )}
                 </div>
+                {displayedDates.length === 0 ? (
+                  <p className="text-sm text-gray-500">Новых действий ещё не было.</p>
+                ) : (
+                  <div className="space-y-6">
+                    {displayedDates.map((date) => {
+                      const logs = logsGroupedByDate[date] || []
+                      const isExpanded = !!expandedDates[date]
+                      const visibleLogs = isExpanded ? logs : logs.slice(0, ACTIVITY_PREVIEW_COUNT)
+                      const hasMore = logs.length > ACTIVITY_PREVIEW_COUNT
 
-                {/* График настроения */}
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">
-                    Динамика настроения (30 дней)
-                  </h3>
-                  {data && data.charts && data.charts.moodByDay && data.charts.moodByDay.length > 0 ? (
-                    <>
-                      <div className="relative h-48 border-b-2 border-l-2 border-gray-300 mb-6">
-                        <div className="absolute inset-0 flex items-end justify-between px-1">
-                          {data.charts.moodByDay.map((day, index) => {
-                            const heightPercent = day.average ? Math.max((day.average / 5) * 100, 25) : 0
-                            return (
-                              <div key={index} className="flex-1 flex items-end justify-center group relative px-0.5">
-                                {day.average ? (
-                                  <div
-                                    className={`w-full rounded-t-sm transition-all group-hover:opacity-90 cursor-pointer shadow-sm ${getMoodColor(day.average)}`}
-                                    style={{ height: `${heightPercent}%`, minHeight: '30px' }}
-                                  />
+                      return (
+                        <div key={date}>
+                          <p className="text-xs uppercase tracking-[0.3em] text-slate-500">
+                            {formatDateLabel(date)}
+                          </p>
+                          <div className="mt-3 space-y-3">
+                            {visibleLogs.map((log) => (
+                              <div key={log.id} className="rounded-2xl border border-slate-200 p-4 flex flex-col">
+                                <p className="text-sm text-slate-500">
+                                  {new Date(log.createdAt).toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                                {log.metadata?.path ? (
+                                  <Link href={log.metadata.path} className="mt-1 text-sm font-semibold text-brand-teal hover:underline">
+                                    {formatLogTitle(log)}
+                                  </Link>
                                 ) : (
-                                  <div className="w-full h-1 bg-gray-200 rounded-full"></div>
+                                  <span className="mt-1 text-sm font-semibold text-slate-900">
+                                    {formatLogTitle(log)}
+                                  </span>
                                 )}
-                                <div className="absolute bottom-full mb-2 left-1/2 transform -translate-x-1/2 opacity-0 group-hover:opacity-100 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap z-20 pointer-events-none">
-                                  {new Date(day.date).toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' })}: {day.average ? `${getMoodEmoji(day.average)} ${day.average.toFixed(1)}` : 'нет данных'}
-                                </div>
                               </div>
-                            )
-                          })}
+                            ))}
+                            {hasMore && (
+                              <button
+                                type="button"
+                                onClick={() => toggleDateVisibility(date)}
+                                className="text-sm font-medium text-brand-teal hover:text-brand-teal/80"
+                              >
+                                {isExpanded ? 'Свернуть' : `Показать еще ${logs.length - ACTIVITY_PREVIEW_COUNT}`}
+                              </button>
+                            )}
+                          </div>
                         </div>
-                      </div>
-                      <div className="flex items-center justify-center gap-4 text-xs">
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-red-500 rounded"></div>
-                          <span>Плохо</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-yellow-500 rounded"></div>
-                          <span>Нормально</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <div className="w-3 h-3 bg-green-500 rounded"></div>
-                          <span>Отлично</span>
-                        </div>
-                      </div>
-                    </>
-                  ) : (
-                    <div className="h-48 flex items-center justify-center border-2 border-dashed border-gray-300 rounded-lg mb-6">
-                      <p className="text-gray-500">Нет данных для отображения</p>
-                    </div>
-                  )}
-                </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
 
-              {/* Типы активностей */}
-              {data && data.diaryStats.byType && Object.keys(data.diaryStats.byType).length > 0 && (
-                <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">
-                    Распределение по типам активностей
-                  </h3>
-                  <div className="space-y-3">
-                    {Object.entries(data.diaryStats.byType)
-                      .sort(([, a], [, b]) => (b as number) - (a as number))
-                      .map(([type, count]) => {
-                        const percentage = ((count as number) / data.diaryStats.total) * 100
-                        return (
-                          <div key={type}>
-                            <div className="flex items-center justify-between mb-1">
-                              <span className="text-sm font-medium text-gray-700">
-                                {activityTypeLabels[type] || type}
-                              </span>
-                              <span className="text-sm text-gray-600">
-                                {count} ({percentage.toFixed(0)}%)
-                              </span>
-                            </div>
-                            <div className="h-2 bg-gray-200 rounded-full overflow-hidden">
-                              <div
-                                className="h-full bg-brand-teal transition-all"
-                                style={{ width: `${percentage}%` }}
-                              />
-                            </div>
-                          </div>
-                        )
-                      })}
-                  </div>
-                </div>
-              )}
-
-              {/* Прогресс по курсам */}
-              {data && data.courseStats.courses && data.courseStats.courses.length > 0 && (
-                <div className="bg-white rounded-xl shadow-lg p-6">
-                  <h3 className="text-lg font-bold text-gray-900 mb-4">
-                    Прогресс по курсам
-                  </h3>
-                  <div className="space-y-4">
-                    {data.courseStats.courses.map((course, index) => (
-                      <div key={index} className="border-l-4 border-brand-teal pl-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-semibold text-gray-900">{course.title}</h4>
-                          <span className={`px-2 py-1 rounded text-xs font-medium ${
-                            course.completed 
-                              ? 'bg-green-100 text-green-700' 
-                              : 'bg-blue-100 text-blue-700'
-                          }`}>
-                            {course.completed ? 'Завершён' : 'В процессе'}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-3">
-                          <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
-                            <div
-                              className="h-full bg-brand-teal transition-all"
-                              style={{ width: `${course.progress}%` }}
-                            />
-                          </div>
-                          <span className="text-sm font-semibold text-gray-700">
-                            {course.progress}%
-                          </span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -353,4 +343,3 @@ export default function AnalyticsPage() {
     </ProtectedRoute>
   )
 }
-

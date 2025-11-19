@@ -1,11 +1,11 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import Image from 'next/image'
+import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import { useSession } from 'next-auth/react'
-import Link from 'next/link'
-import Image from 'next/image'
-import { BookOpen, Clock, Award, CheckCircle, ArrowLeft, Users, Target, Calendar } from 'lucide-react'
+import { ArrowLeft, Award, BookOpen, Calendar, CheckCircle, Clock, Target, Users } from 'lucide-react'
 
 interface Module {
   id: string
@@ -28,10 +28,13 @@ interface Course {
   modules: Module[]
 }
 
+const fallbackHero = '/assets/peaceful-meadow.jpg'
+
 export default function CoursePage() {
   const params = useParams()
   const router = useRouter()
   const { data: session } = useSession()
+
   const [course, setCourse] = useState<Course | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
@@ -39,11 +42,10 @@ export default function CoursePage() {
   const [enrolling, setEnrolling] = useState(false)
 
   useEffect(() => {
-    if (params.slug) {
-      fetchCourse()
-      if (session) {
-        checkEnrollment()
-      }
+    if (!params.slug) return
+    fetchCourse()
+    if (session) {
+      checkEnrollment()
     }
   }, [params.slug, session])
 
@@ -51,15 +53,14 @@ export default function CoursePage() {
     try {
       const slug = Array.isArray(params.slug) ? params.slug[0] : params.slug
       const response = await fetch(`/api/courses/${slug}`)
-      
       if (response.ok) {
         const data = await response.json()
         setCourse(data.course)
       } else {
         setError(true)
       }
-    } catch (error) {
-      console.error('Error fetching course:', error)
+    } catch (err) {
+      console.error('Error fetching course:', err)
       setError(true)
     } finally {
       setLoading(false)
@@ -71,11 +72,11 @@ export default function CoursePage() {
       const response = await fetch('/api/user/enrollments')
       if (response.ok) {
         const data = await response.json()
-        const enrolled = data.enrollments.some((e: any) => e.course.slug === params.slug)
+        const enrolled = data.enrollments.some((entry: any) => entry.course.slug === params.slug)
         setIsEnrolled(enrolled)
       }
-    } catch (error) {
-      console.error('Error checking enrollment:', error)
+    } catch (err) {
+      console.error('Error checking enrollment:', err)
     }
   }
 
@@ -89,21 +90,16 @@ export default function CoursePage() {
 
     setEnrolling(true)
     try {
-      const response = await fetch(`/api/enrollments/${course.id}`, {
-        method: 'POST',
-      })
-
+      const response = await fetch(`/api/enrollments/${course.id}`, { method: 'POST' })
       const data = await response.json()
-
       if (response.ok) {
-        alert('Вы успешно записались на курс!')
         setIsEnrolled(true)
         router.push('/my-courses')
       } else {
         alert(data.error || 'Ошибка записи на курс')
       }
-    } catch (error) {
-      console.error('Error enrolling:', error)
+    } catch (err) {
+      console.error('Error enrolling:', err)
       alert('Ошибка записи на курс')
     } finally {
       setEnrolling(false)
@@ -112,232 +108,181 @@ export default function CoursePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="flex flex-col items-center">
-          <div className="relative">
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-brand-teal/20"></div>
-            <div className="animate-spin rounded-full h-16 w-16 border-4 border-brand-teal border-t-transparent absolute top-0 left-0" style={{ animationDuration: '1s' }}></div>
-          </div>
-          <p className="mt-4 text-slate-600 animate-pulse">Загрузка программы...</p>
-        </div>
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+        <div className="rounded-3xl border border-slate-200 bg-white px-8 py-6 text-slate-600 shadow-sm">Загрузка программы…</div>
       </div>
     )
   }
 
   if (error || !course) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center py-12">
         <div className="container-custom">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="bg-white rounded-3xl p-12 shadow-xl">
-              <BookOpen className="w-24 h-24 text-gray-400 mx-auto mb-6 animate-float" />
-              <h1 className="text-3xl font-bold text-slate-900 mb-4">Программа не найдена</h1>
-              <p className="text-slate-600 mb-8">
-                К сожалению, запрашиваемая программа не найдена или была удалена.
-              </p>
-              <Link
-                href="/programs"
-                className="inline-flex items-center bg-gradient-to-r from-brand-teal to-brand-blue text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300"
-              >
-                <ArrowLeft className="w-5 h-5 mr-2" />
-                Вернуться к программам
-              </Link>
-            </div>
+          <div className="mx-auto max-w-2xl rounded-3xl border border-slate-200 bg-white p-12 text-center shadow-sm">
+            <BookOpen className="mx-auto mb-6 h-16 w-16 text-slate-300" />
+            <h1 className="text-3xl font-heading text-slate-900">Программа не найдена</h1>
+            <p className="mt-3 text-slate-600">К сожалению, запрашиваемая программа не найдена или была удалена.</p>
+            <Link href="/programs" className="mt-6 inline-flex items-center justify-center gap-2 rounded-2xl border border-slate-900 px-6 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-900 hover:text-white">
+              <ArrowLeft className="h-4 w-4" />
+              Вернуться к программам
+            </Link>
           </div>
         </div>
       </div>
     )
   }
 
+  const heroImage = course.coverImage || fallbackHero
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-slate-100 py-12">
-      <div className="container-custom">
-        {/* Навигация назад */}
-        <div className="mb-8 animate-slide-in-left">
-          <Link
-            href="/programs"
-            className="inline-flex items-center text-brand-teal hover:text-brand-teal/80 font-medium transition-colors group"
-          >
-            <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform duration-300" />
-            Назад к программам
+    <div className="bg-white text-slate-900">
+      <section className="relative isolate overflow-hidden px-6 py-20">
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-cover bg-center"
+          style={{
+            backgroundImage: `url('${heroImage}')`,
+          }}
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/80 to-emerald-900/70" />
+
+        <div className="relative z-10 mx-auto max-w-5xl text-center text-white space-y-6">
+          <Link href="/programs" className="inline-flex items-center justify-center gap-2 rounded-full border border-white/30 px-4 py-2 text-xs uppercase tracking-[0.3em] text-white/70 transition hover:border-white">
+            <ArrowLeft className="h-3.5 w-3.5" />
+            К программам
           </Link>
+          <h1 className="font-heading text-4xl md:text-5xl leading-tight">{course.title}</h1>
+          <p className="text-white/80">{course.description}</p>
+          <div className="flex flex-wrap items-center justify-center gap-3 text-xs font-medium uppercase tracking-wide text-white/70">
+            <span className="rounded-full border border-white/30 px-4 py-2">{course.durationWeeks} недель</span>
+            <span className="rounded-full border border-white/30 px-4 py-2">{course.level}</span>
+            <span className="rounded-full border border-white/30 px-4 py-2">{course.modules.length} модулей</span>
+          </div>
         </div>
+      </section>
 
-        {/* Заголовок и основная информация */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12 mb-12">
-          {/* Левая колонка - основная информация */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Заголовок */}
-            <div className="animate-fade-in">
-              {course.coverImage && (
-                <div className="relative mb-8 rounded-3xl overflow-hidden shadow-2xl transform hover:scale-105 transition-transform duration-500 h-96 bg-gray-100">
-                  <Image 
-                    src={course.coverImage} 
-                    alt={course.title} 
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 66vw, 50vw"
-                    priority
-                  />
-                </div>
-              )}
-              
-              <h1 className="text-4xl lg:text-5xl font-heading font-bold text-slate-900 mb-6">
-                {course.title}
-              </h1>
-              
-              <div className="flex flex-wrap gap-3 mb-6">
-                <div className="px-5 py-2 bg-gradient-to-r from-teal-100 to-cyan-100 text-teal-700 rounded-full text-sm font-semibold flex items-center gap-2">
-                  <Clock className="w-4 h-4" />
-                  {course.durationWeeks} недель
-                </div>
-                <div className="px-5 py-2 bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-700 rounded-full text-sm font-semibold flex items-center gap-2">
-                  <Target className="w-4 h-4" />
-                  {course.level}
-                </div>
-                <div className="px-5 py-2 bg-gradient-to-r from-purple-100 to-pink-100 text-purple-700 rounded-full text-sm font-semibold flex items-center gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  {course.modules.length} модулей
-                </div>
+      <main className="page-container space-y-12 pb-16">
+        <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+          <article className="space-y-8 rounded-3xl border border-slate-200 bg-white p-8 shadow-sm">
+            <section>
+              <h2 className="text-2xl font-heading text-slate-900">О программе</h2>
+              <p className="mt-4 text-slate-600 leading-relaxed">{course.fullDescription || course.description}</p>
+            </section>
+
+            <section>
+              <h3 className="text-xl font-semibold text-slate-900">Что входит</h3>
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                {[
+                  { icon: <Target className="h-5 w-5 text-emerald-600" />, title: 'Практические модули', description: 'Каждый блок завершается заданиями и обратной связью.' },
+                  { icon: <Users className="h-5 w-5 text-blue-600" />, title: 'Поддержка кураторов', description: 'Кураторы помогают выстроить план и отслеживать прогресс.' },
+                  { icon: <Calendar className="h-5 w-5 text-indigo-600" />, title: 'Гибкий график', description: 'Учитесь в удобном ритме и совмещайте с личной терапией.' },
+                  { icon: <Award className="h-5 w-5 text-teal-600" />, title: 'Сертификат', description: 'По итогам прохождения вы получаете подтверждение компетенций.' },
+                ].map((item) => (
+                  <div key={item.title} className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white shadow">{item.icon}</div>
+                    <h4 className="mt-4 font-semibold text-slate-900">{item.title}</h4>
+                    <p className="mt-2 text-sm text-slate-600">{item.description}</p>
+                  </div>
+                ))}
               </div>
+            </section>
 
-              <p className="text-xl text-slate-700 leading-relaxed mb-8">
-                {course.description}
-              </p>
-            </div>
-
-            {/* Подробное описание */}
-            {course.fullDescription && (
-              <div className="bg-white rounded-3xl p-8 shadow-xl border border-slate-100/50 animate-slide-in-up">
-                <h2 className="text-3xl font-heading font-bold text-slate-900 mb-6 flex items-center">
-                  <BookOpen className="w-8 h-8 mr-3 text-brand-teal" />
-                  О программе
-                </h2>
-                <div className="prose prose-lg max-w-none text-slate-700 leading-relaxed whitespace-pre-wrap">
-                  {course.fullDescription}
-                </div>
+            <section>
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-slate-900">Структура программы</h3>
+                <span className="text-sm text-slate-500">{course.modules.length} модулей</span>
               </div>
-            )}
-
-            {/* Модули курса */}
-            {course.modules.length > 0 && (
-              <div className="bg-gradient-to-br from-teal-50 via-blue-50 to-white rounded-3xl p-8 shadow-xl border border-slate-100/50 animate-slide-in-up" style={{ animationDelay: '0.2s' }}>
-                <h2 className="text-3xl font-heading font-bold text-slate-900 mb-8 flex items-center">
-                  <Calendar className="w-8 h-8 mr-3 text-brand-teal" />
-                  Модули программы
-                </h2>
-                <div className="space-y-4">
-                  {course.modules.sort((a, b) => a.orderIndex - b.orderIndex).map((module, index) => (
-                    <div
-                      key={module.id}
-                      className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transform hover:scale-105 hover:-translate-y-1 transition-all duration-300 border border-slate-100/50 group"
-                    >
-                      <div className="flex gap-4 items-start">
-                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-teal-500 to-blue-600 flex items-center justify-center shrink-0 shadow-lg transform group-hover:rotate-6 group-hover:scale-110 transition-all duration-300">
-                          <span className="text-white font-bold text-lg">{index + 1}</span>
+              <div className="mt-4 space-y-4">
+                {course.modules
+                  .sort((a, b) => a.orderIndex - b.orderIndex)
+                  .map((module, index) => (
+                    <div key={module.id} className="rounded-2xl border border-slate-100 bg-slate-50 p-5">
+                      <div className="flex gap-4">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-sm font-semibold text-emerald-700">
+                          {String(index + 1).padStart(2, '0')}
                         </div>
-                        <div className="flex-1">
-                          <h3 className="text-xl font-semibold text-slate-900 mb-2 group-hover:text-brand-teal transition-colors duration-300">
-                            {module.title}
-                          </h3>
-                          {module.description && (
-                            <p className="text-slate-600 leading-relaxed group-hover:text-slate-700 transition-colors duration-300">
-                              {module.description}
-                            </p>
-                          )}
+                        <div>
+                          <h4 className="text-lg font-semibold text-slate-900">{module.title}</h4>
+                          <p className="mt-2 text-sm text-slate-600">{module.description}</p>
                         </div>
                       </div>
                     </div>
                   ))}
-                </div>
               </div>
-            )}
-          </div>
+            </section>
+          </article>
 
-          {/* Правая колонка - карточка записи */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-24 animate-slide-in-up" style={{ animationDelay: '0.1s' }}>
-              <div className="bg-white rounded-3xl shadow-2xl p-8 border border-slate-100/50 transform hover:scale-105 transition-all duration-500 overflow-hidden relative">
-                {/* Decorative background */}
-                <div className="absolute inset-0 bg-gradient-to-br from-teal-50 via-blue-50 to-white opacity-50"></div>
-                <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-teal-200/30 to-blue-200/30 rounded-full blur-3xl"></div>
-                
-                <div className="relative z-10">
-                  <div className="mb-6">
-                    <p className="text-sm text-slate-600 mb-2">Стоимость программы</p>
-                    <p className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-blue-600 bg-clip-text text-transparent">
-                      {course.price === 0 ? 'Бесплатно' : `${course.price.toLocaleString()}₽`}
-                    </p>
-                  </div>
-
-                  {isEnrolled ? (
-                    <Link
-                      href="/my-courses"
-                      className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 mb-6 flex items-center justify-center gap-2"
-                    >
-                      <CheckCircle className="w-5 h-5" />
-                      Вы записаны на курс
-                    </Link>
-                  ) : course.price === 0 ? (
-                    <button
-                      onClick={handleEnroll}
-                      disabled={enrolling}
-                      className="w-full bg-gradient-to-r from-brand-teal to-brand-blue text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 mb-6 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Award className="w-5 h-5" />
-                      {enrolling ? 'Записываемся...' : 'Записаться бесплатно'}
-                    </button>
-                  ) : (
-                    <button
-                      onClick={() => alert('Платные курсы скоро будут доступны')}
-                      className="w-full bg-gradient-to-r from-brand-teal to-brand-blue text-white px-8 py-4 rounded-2xl font-semibold hover:shadow-2xl transform hover:scale-105 transition-all duration-300 mb-6 flex items-center justify-center gap-2"
-                    >
-                      <Award className="w-5 h-5" />
-                      Записаться на курс
-                    </button>
-                  )}
-
-                  <div className="space-y-4 mb-6">
-                    <h3 className="font-semibold text-slate-900 text-lg mb-4">Что включено:</h3>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-700">Доступ ко всем материалам курса</span>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-700">Практические упражнения</span>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-700">Поддержка специалистов</span>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-700">Сертификат о прохождении</span>
-                    </div>
-                    <div className="flex items-start space-x-3">
-                      <CheckCircle className="w-5 h-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-slate-700">Пожизненный доступ</span>
-                    </div>
-                  </div>
-
-                  <div className="pt-6 border-t border-slate-200">
-                    <div className="flex items-center text-sm text-slate-600 mb-2">
-                      <Users className="w-4 h-4 mr-2" />
-                      <span>Уже записалось 127 человек</span>
-                    </div>
-                    <div className="flex items-center text-sm text-slate-600">
-                      <Award className="w-4 h-4 mr-2" />
-                      <span>Рейтинг: 4.9/5.0</span>
-                    </div>
-                  </div>
-                </div>
+          <aside className="space-y-6">
+            <div className="lg:sticky lg:top-28 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex items-center justify-between text-sm text-slate-500">
+                <span>Стоимость</span>
+                <span className="rounded-full bg-slate-50 px-3 py-1 font-medium text-slate-600">{course.level}</span>
               </div>
+              <p className="mt-4 text-3xl font-heading text-slate-900">{course.price ? `${course.price.toLocaleString()} ₽` : 'Бесплатно'}</p>
+              <p className="mt-2 text-sm text-slate-500">Материалы, супервизия и сопровождение на протяжении программы.</p>
+              {!isEnrolled ? (
+                <button
+                  onClick={handleEnroll}
+                  disabled={enrolling}
+                  className="mt-6 w-full rounded-2xl bg-brand-teal px-4 py-3 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-brand-teal/90 disabled:opacity-50"
+                >
+                  {enrolling ? 'Записываем...' : 'Записаться на программу'}
+                </button>
+              ) : (
+                <Link
+                  href="/my-courses"
+                  className="mt-6 inline-flex w-full items-center justify-center rounded-2xl border border-brand-teal/40 px-4 py-3 text-sm font-semibold text-brand-teal transition hover:bg-brand-teal/5"
+                >
+                  Перейти к программе
+                </Link>
+              )}
+
+              <dl className="mt-6 space-y-3 text-sm text-slate-600">
+                <div className="flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4 text-emerald-600" />
+                  <span>Возврат средств в течение 14 дней</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Users className="h-4 w-4 text-emerald-600" />
+                  <span>Поддержка кураторов 7 дней в неделю</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Award className="h-4 w-4 text-emerald-600" />
+                  <span>Сертификат после завершения программы</span>
+                </div>
+              </dl>
             </div>
-          </div>
+
+            <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 text-slate-800">
+              <h3 className="text-lg font-semibold">Нужна помощь с выбором?</h3>
+              <p className="mt-2 text-sm text-slate-600">Оставьте заявку — мы поможем подобрать программу и расскажем о деталях участия.</p>
+              <Link
+                href="/contact"
+                className="mt-4 inline-flex w-full items-center justify-center rounded-2xl border border-slate-900 px-4 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-900 hover:text-white"
+              >
+                Связаться с куратором
+              </Link>
+            </div>
+          </aside>
         </div>
-      </div>
+
+        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {[
+            { title: 'Для кого', description: 'Участники и ветераны боевых действий, их семьи, специалисты по ментальному здоровью.', icon: Users },
+            { title: 'Цели программы', description: 'Стабилизация состояния, развитие навыков саморегуляции и поддержка в долгосрочной перспективе.', icon: Target },
+            { title: 'Формат', description: 'Онлайн-уроки, живые встречи с экспертами, практические задания и обратная связь.', icon: BookOpen },
+            { title: 'График', description: 'Гибкий темп, доступ к материалам 24/7 и еженедельные контрольные точки.', icon: Calendar },
+          ].map((item) => (
+            <div key={item.title} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-50 text-emerald-600">
+                <item.icon className="h-6 w-6" />
+              </div>
+              <h4 className="mt-4 text-lg font-semibold text-slate-900">{item.title}</h4>
+              <p className="mt-2 text-sm text-slate-600">{item.description}</p>
+            </div>
+          ))}
+        </section>
+      </main>
     </div>
   )
 }
-

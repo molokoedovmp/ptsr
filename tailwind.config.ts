@@ -10,6 +10,7 @@ const config: Config = {
     extend: {
       colors: {
         'brand-teal': '#0f9d8a',
+        'brand-light': '#f8fafc',
         'brand-blue': '#2563eb',
         'brand-dark': '#0f172a',
         primary: {
@@ -51,4 +52,3 @@ const config: Config = {
   plugins: [],
 }
 export default config
-

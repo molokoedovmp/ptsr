@@ -14,10 +14,7 @@ export default function Footer() {
             <p className="text-sm mb-4">
               Профессиональная платформа поддержки людей с посттравматическим стрессовым расстройством
             </p>
-            <div className="flex items-center space-x-2 text-sm">
-              <Heart className="w-4 h-4 text-brand-teal" />
-              <span>Помогаем с 2024 года</span>
-            </div>
+            
           </div>
 
           {/* Основные разделы */}
