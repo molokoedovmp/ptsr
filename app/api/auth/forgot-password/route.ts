@@ -48,7 +48,8 @@ export async function POST(request: Request) {
     })
 
     // Отправляем email
-    await sendPasswordResetEmail(email, token)
+    const origin = request.headers.get('origin') || process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL
+    await sendPasswordResetEmail(email, token, origin || undefined)
 
     return NextResponse.json({
       success: true,
@@ -62,4 +63,3 @@ export async function POST(request: Request) {
     )
   }
 }
-

@@ -10,6 +10,7 @@ import {
   FileText,
   Video,
   UserCheck,
+  ClipboardList,
   BarChart3,
   Home,
   Settings,
@@ -36,6 +37,7 @@ export default function AdminSidebar() {
     { id: 'articles', label: 'Статьи', href: '/admin/articles', icon: <FileText className="w-5 h-5" /> },
     { id: 'videos', label: 'Видео', href: '/admin/videos', icon: <Video className="w-5 h-5" /> },
     { id: 'psychologists', label: 'Психологи', href: '/admin/psychologists', icon: <UserCheck className="w-5 h-5" /> },
+    { id: 'psychologist-applications', label: 'Заявки психологов', href: '/admin/psychologists/applications', icon: <ClipboardList className="w-5 h-5" /> },
   ]
 
   const handleSignOut = () => {
@@ -104,4 +106,3 @@ export default function AdminSidebar() {
     </div>
   )
 }
-

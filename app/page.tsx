@@ -1,5 +1,6 @@
 'use client'
 
+import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 
@@ -10,7 +11,16 @@ interface Course {
   description: string
   durationWeeks: number | null
   level: string | null
+  coverImage?: string | null
   _count: { modules: number }
+}
+
+interface ProgramPreview {
+  title: string
+  description: string
+  meta: string
+  href: string
+  coverImage: string
 }
 
 const services = [
@@ -50,6 +60,14 @@ const steps = [
   { title: 'Начало работы', description: 'Планируйте сессии и получайте помощь онлайн' },
 ]
 
+const previewFallbacks = ['/assets/peaceful-meadow.jpg', '/assets/forest-path.jpg']
+const buttonPrimary =
+  'inline-flex items-center justify-center gap-2 rounded-full bg-brand-teal px-8 py-3 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5'
+const buttonSecondaryDark =
+  'inline-flex items-center justify-center rounded-full border border-white/50 px-8 py-3 text-sm font-semibold text-white transition hover:border-white'
+const buttonSecondaryLight =
+  'inline-flex items-center justify-center rounded-full border border-slate-200 px-8 py-3 text-sm font-semibold text-slate-700 transition hover:border-brand-teal hover:text-brand-teal'
+
 export default function HomePage() {
   const [courses, setCourses] = useState<Course[]>([])
   const [loading, setLoading] = useState(true)
@@ -78,13 +96,14 @@ export default function HomePage() {
     fetchCourses()
   }, [])
 
-  const programs = useMemo(
+  const programs = useMemo<ProgramPreview[]>(
     () =>
-      courses.slice(0, 2).map((course) => ({
+      courses.slice(0, 2).map((course, index) => ({
         title: course.title,
         description: course.description,
         meta: formatProgramMeta(course),
         href: `/programs/${course.slug}`,
+        coverImage: course.coverImage || previewFallbacks[index % previewFallbacks.length],
       })),
     [courses],
   )
@@ -138,31 +157,22 @@ export default function HomePage() {
         >
           <div className="absolute inset-0 bg-black/50" />
           <div className="page-container relative z-10">
-            <div className="max-w-3xl animate-fade-in mx-auto">
-              <h1 className="text-4xl md:text-5xl font-heading text-white mb-6 lg:text-6xl text-center font-bold">
+            <div className="max-w-3xl animate-fade-in mx-auto text-center">
+              <h1 className="text-4xl md:text-5xl font-heading text-white mb-6 lg:text-6xl font-bold">
                 Поддержка, когда она действительно нужна
               </h1>
-              <p className="text-xl mb-8 text-white/90 text-center">
+              <p className="text-xl mb-8 text-white/90">
                 Получите доступ к профессиональной поддержке и ресурсам для заботы о вашем психическом благополучии, не
                 выходя из дома
               </p>
               <div className="flex flex-wrap items-center justify-center gap-4">
-                <Link
-                  href="/specialists"
-                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-11 rounded-md px-8 bg-brand-teal text-white shadow-lg hover:bg-white hover:text-brand-dark transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-                >
+                <Link href="/specialists" className={buttonPrimary}>
                   Найти специалиста
                 </Link>
-                <Link
-                  href="/resources/anxiety-assessment"
-                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-11 rounded-md px-8 bg-brand-teал text-white shadow-lg hover:bg-white hover:text-brand-dark transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-                >
+                <Link href="/resources/anxiety-assessment" className={buttonSecondaryDark}>
                   Оценка уровня тревоги
                 </Link>
-                <Link
-                  href="/resources"
-                  className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 h-11 rounded-md px-8 bg-brand-teал text-white shadow-lg hover:bg-white hover:text-brand-dark transition-all duration-300 transform hover:-translate-y-1 hover:shadow-xl"
-                >
+                <Link href="/resources" className={buttonSecondaryDark}>
                   Инструменты
                 </Link>
               </div>
@@ -189,19 +199,26 @@ export default function HomePage() {
               )}
 
               {programs.map((program) => (
-                <div key={program.title} className="rounded-lg border bg-card text-card-foreground shadow-sm card-hover flex flex-col p-6">
-                  <div className="flex flex-col space-y-1.5 text-center md:text-left">
-                    <span className="inline-flex items-center justify-center rounded-full bg-brand-teal/10 text-brand-teal text-xs font-semibold px-3 py-1 w-fit mx-auto md:mx-0">
+                <div key={program.title} className="rounded-lg border bg-card text-card-foreground shadow-sm card-hover flex flex-col overflow-hidden">
+                  <div className="relative h-44 w-full">
+                    <Image
+                      src={program.coverImage}
+                      alt={program.title}
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 768px) 100vw, 50vw"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent" />
+                    <div className="absolute bottom-4 left-4 text-white text-sm font-medium bg-slate-900/50 px-3 py-1 rounded-full">
                       {program.meta}
-                    </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-col space-y-1.5 text-center md:text-left px-6 pt-6">
                     <h3 className="font-semibold tracking-tight text-xl">{program.title}</h3>
                   </div>
-                  <p className="text-muted-foreground mt-4 flex-1 text-center md:text-left">{program.description}</p>
-                  <div className="pt-6">
-                    <Link
-                      href={program.href}
-                      className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-primary-foreground shadow-md hover:shadow-lg transform hover:-translate-y-px h-10 px-4 py-2 w-full bg-brand-teal hover:bg-brand-teal/90"
-                    >
+                  <p className="text-muted-foreground mt-4 flex-1 text-center md:text-left px-6">{program.description}</p>
+                  <div className="pt-6 px-6 pb-6">
+                    <Link href={program.href} className={buttonPrimary + ' w-full justify-center'}>
                       Узнать больше
                     </Link>
                   </div>
@@ -211,7 +228,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        <section className="py-12 bg-background">
+        <section className="py-12 bg-white">
           <div className="page-container">
             <h2 className="section-title text-center">Наши услуги</h2>
             <p className="section-subtitle text-center mx-auto">
@@ -219,12 +236,15 @@ export default function HomePage() {
             </p>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-12">
               {services.map((service) => (
-                <div key={service.title} className="rounded-lg border bg-card text-card-foreground shadow-sm card-hover">
-                  <div className="p-6 pt-6 text-center md:text-left">
-                    <div className="h-12 w-12 rounded-full bg-brand-teal/20 flex items-center justify-center mb-4 mx-auto md:mx-0">{service.icon}</div>
-                    <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
-                    <p className="text-muted-foreground">{service.description}</p>
+                <div
+                  key={service.title}
+                  className="rounded-2xl border border-slate-100 bg-white shadow-sm px-6 py-8 text-center space-y-3"
+                >
+                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-brand-teal/10 text-brand-teal">
+                    {service.icon}
                   </div>
+                  <h3 className="text-xl font-semibold text-slate-900">{service.title}</h3>
+                  <p className="text-slate-600">{service.description}</p>
                 </div>
               ))}
             </div>
@@ -247,26 +267,23 @@ export default function HomePage() {
               ))}
             </div>
             <div className="text-center mt-12">
-              <Link
-                href="/register"
-                className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg transform hover:-translate-y-px h-11 rounded-md px-8 bg-brand-teal hover:brightness-90"
-              >
+              <Link href="/register" className={buttonPrimary}>
                 Начать сейчас
               </Link>
             </div>
           </div>
         </section>
 
-        <section className="bg-brand-blue py-16 text-white">
-          <div className="page-container text-center">
-            <h2 className="text-3xl md:text-4xl font-heading font-bold mb-6">
+        <section className="py-16 bg-white">
+          <div className="page-container text-center space-y-6">
+            <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Начните сегодня</p>
+            <h2 className="text-3xl md:text-4xl font-heading font-bold text-slate-900">
               Готовы сделать первый шаг к улучшению вашего психического здоровья?
             </h2>
-            <p className="text-xl mb-8 text-blue-100 max-w-3xl mx-auto">Присоединяйтесь к тысячам людей, которые уже получили поддержку на нашей платформе.</p>
-            <Link
-              href="/specialists"
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 shadow-md hover:shadow-lg transform hover:-translate-y-px h-11 rounded-md px-8 bg-white text-brand-blue hover:bg-gray-100"
-            >
+            <p className="text-lg text-slate-600 max-w-3xl mx-auto">
+              Присоединяйтесь к сообществу, где эксперты и программы помогают восстанавливаться в комфортном темпе.
+            </p>
+            <Link href="/specialists" className={buttonPrimary}>
               Найти специалиста
             </Link>
           </div>

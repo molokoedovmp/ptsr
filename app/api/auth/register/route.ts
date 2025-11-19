@@ -3,11 +3,23 @@ import { hash } from 'bcryptjs'
 import { prisma } from '@/lib/prisma'
 import { sendVerificationEmail } from '@/lib/email'
 import crypto from 'crypto'
+import { UserRole } from '@prisma/client'
 
 export async function POST(request: Request) {
   try {
     const body = await request.json()
-    const { email, password, full_name, phone } = body
+    const {
+      email,
+      password,
+      full_name,
+      phone,
+      role,
+      invite_code,
+      specialization,
+      experience_years,
+      education,
+      price,
+    } = body
 
     if (!email || !password) {
       return NextResponse.json(
@@ -35,6 +47,22 @@ export async function POST(request: Request) {
       )
     }
 
+    const isPsychologistRegistration = role === 'psychologist'
+
+    if (isPsychologistRegistration) {
+      const codes = (process.env.PSYCHOLOGIST_INVITE_CODES || process.env.PSYCHOLOGIST_INVITE_CODE || '')
+        .split(',')
+        .map((code) => code.trim())
+        .filter(Boolean)
+
+      if (!invite_code || !codes.length || !codes.includes(invite_code)) {
+        return NextResponse.json(
+          { error: 'Неверный или отсутствующий код приглашения' },
+          { status: 400 },
+        )
+      }
+    }
+
     // Хешируем пароль
     const hashedPassword = await hash(password, 12)
 
@@ -45,9 +73,30 @@ export async function POST(request: Request) {
         password: hashedPassword,
         fullName: full_name || null,
         phone: phone || null,
-        roles: ['USER'],
+        roles: isPsychologistRegistration ? [UserRole.USER, UserRole.PSYCHOLOGIST] : [UserRole.USER],
       },
     })
+
+    if (isPsychologistRegistration) {
+      const specializationList: string[] =
+        typeof specialization === 'string'
+          ? specialization
+              .split(',')
+              .map((item) => item.trim())
+              .filter(Boolean)
+          : ['Психолог']
+
+      await prisma.psychologistProfile.create({
+        data: {
+          userId: user.id,
+          specialization: specializationList.length ? specializationList : ['Психолог'],
+          experienceYears: Number(experience_years) || 0,
+          education: education || 'Высшее психологическое',
+          bio: null,
+          price: Number(price) || 3000,
+        },
+      })
+    }
 
     // Генерируем токен верификации
     const verificationToken = crypto.randomBytes(32).toString('hex')
@@ -86,4 +135,3 @@ export async function POST(request: Request) {
     )
   }
 }
-

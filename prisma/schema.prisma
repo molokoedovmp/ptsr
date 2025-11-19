@@ -132,8 +132,61 @@ model PsychologistProfile {
   createdAt       DateTime @default(now()) @map("created_at")
   updatedAt       DateTime @updatedAt @map("updated_at")
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  slots           ConsultationSlot[]
 
   @@map("psychologist_profiles")
+}
+
+model PsychologistApplication {
+  id              String             @id @default(cuid())
+  fullName        String
+  email           String
+  phone           String
+  specialization  String
+  experienceYears Int      @map("experience_years")
+  education       String
+  inviteCode      String?
+  message         String?
+  activationToken String?            @map("activation_token")
+  activationTokenExpires DateTime?   @map("activation_token_expires")
+  activated       Boolean            @default(false)
+  activatedAt     DateTime?          @map("activated_at")
+  status          ApplicationStatus @default(PENDING)
+  createdAt       DateTime          @default(now()) @map("created_at")
+  updatedAt       DateTime          @updatedAt @map("updated_at")
+
+  @@unique([email, inviteCode])
+  @@map("psychologist_applications")
+}
+
+enum ApplicationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  ACTIVATED
+}
+
+model ConsultationSlot {
+  id              String      @id @default(cuid())
+  psychologistId  String      @map("psychologist_id")
+  startTime       DateTime    @map("start_time")
+  endTime         DateTime    @map("end_time")
+  status          SlotStatus  @default(AVAILABLE)
+  clientName      String?     @map("client_name")
+  notes           String?
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+  psychologist    PsychologistProfile @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+
+  @@index([psychologistId, startTime])
+  @@map("consultation_slots")
+}
+
+enum SlotStatus {
+  AVAILABLE
+  BOOKED
+  COMPLETED
+  CANCELLED
 }
 
 model Article {

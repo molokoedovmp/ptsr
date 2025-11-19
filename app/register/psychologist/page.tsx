@@ -1,27 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { useAuth } from '@/contexts/AuthContext'
-import { Mail, Lock, User, Phone, AlertCircle, FileText, GraduationCap, Brain } from 'lucide-react'
+import { Mail, User, Phone, AlertCircle, FileText, GraduationCap, Brain } from 'lucide-react'
 
 export default function RegisterPsychologistPage() {
   const [formData, setFormData] = useState({
     email: '',
-    password: '',
-    confirmPassword: '',
     fullName: '',
     phone: '',
     specialization: '',
     experienceYears: '',
     education: '',
-    inviteCode: '',
+    message: '',
   })
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
-  const { signUp } = useAuth()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     setFormData({
@@ -30,50 +25,45 @@ export default function RegisterPsychologistPage() {
     })
   }
 
-  const validateForm = () => {
-    if (!formData.inviteCode) {
-      setError('Требуется код приглашения для регистрации психолога')
-      return false
-    }
-    if (formData.password.length < 8) {
-      setError('Пароль должен содержать минимум 8 символов')
-      return false
-    }
-    if (formData.password !== formData.confirmPassword) {
-      setError('Пароли не совпадают')
-      return false
-    }
-    return true
-  }
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
-
-    if (!validateForm()) {
-      return
-    }
+    setSuccess('')
 
     setLoading(true)
 
     try {
-      const { error } = await signUp(formData.email, formData.password, {
-        full_name: formData.fullName,
-        phone: formData.phone,
-        role: 'psychologist',
-        invite_code: formData.inviteCode,
-        specialization: formData.specialization,
-        experience_years: parseInt(formData.experienceYears),
-        education: formData.education,
-      })
+      const response = await fetch('/api/psychologist-applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          fullName: formData.fullName,
+          email: formData.email,
+          phone: formData.phone,
+          specialization: formData.specialization,
+          experienceYears: parseInt(formData.experienceYears),
+          education: formData.education,
+          message: formData.message,
+       }),
+     })
 
-      if (error) {
-        setError(error.message || 'Ошибка при регистрации')
-      } else {
-        router.push('/psychologist/dashboard')
+      if (!response.ok) {
+        const data = await response.json()
+        throw new Error(data.error || 'Ошибка при отправке заявки')
       }
+
+      setSuccess('Заявка отправлена. Мы свяжемся с вами после проверки.')
+      setFormData({
+        email: '',
+        fullName: '',
+        phone: '',
+        specialization: '',
+        experienceYears: '',
+        education: '',
+        message: '',
+      })
     } catch (err) {
-      setError('Произошла ошибка. Попробуйте снова.')
+      setError(err instanceof Error ? err.message : 'Произошла ошибка. Попробуйте снова.')
     } finally {
       setLoading(false)
     }
@@ -95,7 +85,8 @@ export default function RegisterPsychologistPage() {
 
           <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-lg">
             <p className="text-sm">
-              <strong>Обратите внимание:</strong> Для регистрации требуется код приглашения от администрации платформы.
+              <strong>Как это работает:</strong> вы заполняете заявку, администратор проверяет данные и отправляет письмо с
+              ссылкой для подтверждения регистрации. После перехода по ссылке можно создать пароль и войти как психолог.
             </p>
           </div>
 
@@ -103,6 +94,11 @@ export default function RegisterPsychologistPage() {
             <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex items-center space-x-2">
               <AlertCircle className="w-5 h-5 flex-shrink-0" />
               <span>{error}</span>
+            </div>
+          )}
+          {success && (
+            <div className="mb-6 bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+              {success}
             </div>
           )}
 
@@ -165,7 +161,6 @@ export default function RegisterPsychologistPage() {
                 />
               </div>
             </div>
-
             <div>
               <label htmlFor="specialization" className="block text-sm font-medium text-gray-700 mb-2">
                 Специализация *
@@ -224,60 +219,18 @@ export default function RegisterPsychologistPage() {
             </div>
 
             <div>
-              <label htmlFor="inviteCode" className="block text-sm font-medium text-gray-700 mb-2">
-                Код приглашения *
+              <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-2">
+                Дополнительная информация
               </label>
-              <input
-                id="inviteCode"
-                name="inviteCode"
-                type="text"
-                value={formData.inviteCode}
+              <textarea
+                id="message"
+                name="message"
+                rows={4}
+                value={formData.message}
                 onChange={handleChange}
-                required
                 className="input-field"
-                placeholder="XXXX-XXXX-XXXX"
+                placeholder="Расскажите о себе, опыте, готовности работать онлайн..."
               />
-              <p className="text-xs text-gray-500 mt-1">Код выдается администратором платформы</p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
-                  Пароль *
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    id="password"
-                    name="password"
-                    type="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required
-                    className="input-field pl-10"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-2">
-                  Подтвердите пароль *
-                </label>
-                <div className="relative">
-                  <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                  <input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    value={formData.confirmPassword}
-                    onChange={handleChange}
-                    required
-                    className="input-field pl-10"
-                    placeholder="••••••••"
-                  />
-                </div>
-              </div>
             </div>
 
             <div className="flex items-start">
@@ -318,4 +271,3 @@ export default function RegisterPsychologistPage() {
     </div>
   )
 }
-
