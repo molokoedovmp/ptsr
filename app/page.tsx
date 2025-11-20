@@ -169,7 +169,7 @@ export default function HomePage() {
                 <Link href="/specialists" className={buttonPrimary}>
                   Найти специалиста
                 </Link>
-                <Link href="/resources/anxiety-assessment" className={buttonSecondaryDark}>
+                <Link href="/anxiety-tests" className={buttonSecondaryDark}>
                   Оценка уровня тревоги
                 </Link>
                 <Link href="/resources" className={buttonSecondaryDark}>

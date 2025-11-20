@@ -32,6 +32,7 @@ model User {
   supportTickets      SupportTicket[]
   transactions        Transaction[]
   activityLogs        ActivityLog[]        // ← Добавлено
+  anxietyTestResults  AnxietyTestResult[]
 
   @@map("users")
 }
@@ -404,4 +405,19 @@ enum TicketPriority {
   LOW
   MEDIUM
   HIGH
+}
+model AnxietyTestResult {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  testSlug    String   @map("test_slug")
+  testTitle   String   @map("test_title")
+  score       Int
+  maxScore    Int      @map("max_score")
+  severity    String
+  answers     Json?
+  completedAt DateTime @default(now()) @map("completed_at")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completedAt])
+  @@map("anxiety_test_results")
 }

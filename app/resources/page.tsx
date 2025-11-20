@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { BookOpen, Clock, Search, Video } from 'lucide-react'
+import { BookOpen, Clock, Search, Video, Brain, Heart, Activity, PenSquare } from 'lucide-react'
 
 interface Article {
   id: string
@@ -27,6 +27,37 @@ export default function ResourcesPage() {
   const [articles, setArticles] = useState<Article[]>([])
   const [videos, setVideos] = useState<VideoItem[]>([])
   const [loading, setLoading] = useState(true)
+
+  const tools = [
+    {
+      title: 'Оценка уровня тревоги',
+      description: 'GAD-7, BAI, HARS и STAI с автоматическим подсчётом и сохранением в профиле.',
+      icon: <Brain className="w-6 h-6 text-emerald-600" />,
+      href: '/anxiety-tests',
+      badge: 'GAD-7 / BAI / HARS / STAI',
+    },
+    {
+      title: 'Дневник настроения',
+      description: 'Фиксируйте эмоциональное состояние и отслеживайте динамику в личном кабинете.',
+      icon: <Heart className="w-6 h-6 text-rose-500" />,
+      href: '/mood-diary',
+      badge: 'Ежедневная рефлексия',
+    },
+    {
+      title: 'Дневник активности',
+      description: 'Записывайте действия и триггеры, чтобы видеть взаимосвязь событий и самочувствия.',
+      icon: <Activity className="w-6 h-6 text-blue-500" />,
+      href: '/diary',
+      badge: 'Аналитика поведения',
+    },
+    {
+      title: 'План действий с психологом',
+      description: 'Подбор специалистов, курсов и практик на основе ваших запросов.',
+      icon: <PenSquare className="w-6 h-6 text-purple-500" />,
+      href: '/specialists',
+      badge: 'Координация и сопровождение',
+    },
+  ]
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,6 +114,25 @@ export default function ResourcesPage() {
       </section>
 
       <main className="page-container space-y-16 pb-16">
+        <section className="space-y-6">
+          <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Инструменты</p>
+          <h2 className="text-3xl font-heading text-slate-900">Что вы получаете на платформе</h2>
+          <div className="grid gap-6 md:grid-cols-2">
+            {tools.map((tool) => (
+              <Link key={tool.title} href={tool.href} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+                <div className="flex items-start gap-4">
+                  <div className="rounded-2xl bg-slate-100 p-3">{tool.icon}</div>
+                  <div className="space-y-2">
+                    <span className="text-xs uppercase tracking-[0.3em] text-slate-400">{tool.badge}</span>
+                    <h3 className="text-xl font-semibold text-slate-900">{tool.title}</h3>
+                    <p className="text-sm text-slate-600">{tool.description}</p>
+                    <span className="text-sm font-semibold text-brand-teal">Открыть →</span>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
         <section className="space-y-6">
           <div className="flex items-center justify-between">
             <div>

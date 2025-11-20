@@ -24,6 +24,7 @@ export default function UserSidebar() {
     { id: 'diary', label: 'Дневник', href: '/diary', icon: <FileText className="w-5 h-5" /> },
     { id: 'mood', label: 'Дневник настроения', href: '/mood-diary', icon: <Heart className="w-5 h-5" /> },
     { id: 'certificates', label: 'Сертификаты', href: '/certificates', icon: <Award className="w-5 h-5" /> },
+    { id: 'tests', label: 'Результаты тестов', href: '/profile/tests', icon: <FileText className="w-5 h-5" /> },
     { id: 'settings', label: 'Настройки', href: '/settings', icon: <Settings className="w-5 h-5" /> },
   ]
 

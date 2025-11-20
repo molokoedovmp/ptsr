@@ -1,14 +1,43 @@
 'use client'
 
+import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import UserSidebar from '@/components/UserSidebar'
 import { useAuth } from '@/contexts/AuthContext'
 import { User, Mail, Calendar, BookOpen, Award, Heart, FileText, Edit2 } from 'lucide-react'
 
+type AnxietyResult = {
+  id: string
+  testTitle: string
+  score: number
+  maxScore: number
+  severity: string
+  completedAt: string
+}
+
 export default function ProfilePage() {
   const { user } = useAuth()
   const router = useRouter()
+  const [anxietyResults, setAnxietyResults] = useState<AnxietyResult[]>([])
+  const [resultsLoading, setResultsLoading] = useState(true)
+
+  useEffect(() => {
+    const fetchResults = async () => {
+      try {
+        const response = await fetch('/api/anxiety-tests/results')
+        if (!response.ok) return
+        const json = await response.json()
+        setAnxietyResults(json.results || [])
+      } catch (error) {
+        console.error('Failed to load anxiety results', error)
+      } finally {
+        setResultsLoading(false)
+      }
+    }
+
+    fetchResults()
+  }, [])
 
   return (
     <ProtectedRoute>
@@ -167,6 +196,37 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   </button>
+                  <button 
+                    onClick={() => router.push('/anxiety-tests')}
+                    className="bg-white rounded-xl p-6 hover:shadow-lg transition-all hover:scale-105 text-left border-2 border-transparent hover:border-emerald-600"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div className="bg-emerald-100 rounded-lg p-3">
+                        <FileText className="w-6 h-6 text-emerald-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-slate-900">Оценка тревожности</h3>
+                        <p className="text-sm text-slate-600">Пройдите стандартизированный тест</p>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+              </div>
+
+              <div className="bg-white rounded-2xl shadow-lg p-8 border border-slate-100">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-900">Результаты тестов</h2>
+                    <p className="text-sm text-slate-600">Сохраняются после прохождения в разделе «Оценка тревожности»</p>
+                  </div>
+                  <div className="flex gap-3">
+                    <button onClick={() => router.push('/anxiety-tests')} className="text-sm font-semibold text-emerald-600">
+                      Пройти тест →
+                    </button>
+                    <button onClick={() => router.push('/profile/tests')} className="text-sm font-semibold text-slate-500">
+                      Смотреть историю
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
