@@ -35,6 +35,7 @@ export default function AdminSidebar() {
     { id: 'users', label: 'Пользователи', href: '/admin/users', icon: <Users className="w-5 h-5" /> },
     { id: 'courses', label: 'Курсы', href: '/admin/courses', icon: <BookOpen className="w-5 h-5" /> },
     { id: 'articles', label: 'Статьи', href: '/admin/articles', icon: <FileText className="w-5 h-5" /> },
+    { id: 'article-moderation', label: 'Модерация статей', href: '/admin/articles/moderation', icon: <ClipboardList className="w-5 h-5" /> },
     { id: 'videos', label: 'Видео', href: '/admin/videos', icon: <Video className="w-5 h-5" /> },
     { id: 'psychologists', label: 'Психологи', href: '/admin/psychologists', icon: <UserCheck className="w-5 h-5" /> },
     { id: 'psychologist-applications', label: 'Заявки психологов', href: '/admin/psychologists/applications', icon: <ClipboardList className="w-5 h-5" /> },

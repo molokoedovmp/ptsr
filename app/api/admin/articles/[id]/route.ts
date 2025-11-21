@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { UserRole } from '@prisma/client'
+import { ArticleStatus, UserRole } from '@prisma/client'
 
 // Получение статьи по ID
 export async function GET(
@@ -66,18 +66,29 @@ export async function PATCH(
 
     const data = await request.json()
 
+    const dataUpdate: any = {}
+    if (data.title) dataUpdate.title = data.title
+    if (data.slug) dataUpdate.slug = data.slug
+    if (data.content) dataUpdate.content = data.content
+    if (data.excerpt) dataUpdate.excerpt = data.excerpt
+    if (data.category) dataUpdate.category = data.category
+    if (data.displayAuthor !== undefined) dataUpdate.displayAuthor = data.displayAuthor?.trim() || null
+    if (data.tags) dataUpdate.tags = data.tags
+    if (data.coverImage !== undefined) dataUpdate.coverImage = data.coverImage
+    if (data.published !== undefined) dataUpdate.published = data.published
+    if (data.moderationComment !== undefined) dataUpdate.moderationComment = data.moderationComment
+    if (data.status && Object.values(ArticleStatus).includes(data.status)) {
+      dataUpdate.status = data.status
+      if (data.status === ArticleStatus.APPROVED) {
+        dataUpdate.published = true
+      } else if (data.status === ArticleStatus.REJECTED || data.status === ArticleStatus.PENDING || data.status === ArticleStatus.DRAFT) {
+        dataUpdate.published = false
+      }
+    }
+
     const article = await prisma.article.update({
       where: { id: params.id },
-      data: {
-        ...(data.title && { title: data.title }),
-        ...(data.slug && { slug: data.slug }),
-        ...(data.content && { content: data.content }),
-        ...(data.excerpt && { excerpt: data.excerpt }),
-        ...(data.category && { category: data.category }),
-        ...(data.tags && { tags: data.tags }),
-        ...(data.coverImage !== undefined && { coverImage: data.coverImage }),
-        ...(data.published !== undefined && { published: data.published }),
-      },
+      data: dataUpdate,
     })
 
     return NextResponse.json({ article })
@@ -124,4 +135,3 @@ export async function DELETE(
     )
   }
 }
-

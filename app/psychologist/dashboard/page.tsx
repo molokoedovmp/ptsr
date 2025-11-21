@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
 import PsychologistProtectedRoute from '@/components/psychologist/PsychologistProtectedRoute'
 import { Calendar, Users, Clock, TrendingUp, Settings, DollarSign, Star, ShieldCheck, CheckCircle, Trash2 } from 'lucide-react'
 
@@ -46,6 +47,7 @@ const statIcons: Record<string, { icon: JSX.Element; color: string }> = {
 }
 
 export default function PsychologistDashboardPage() {
+  const router = useRouter()
   const [data, setData] = useState<DashboardData | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -245,7 +247,7 @@ export default function PsychologistDashboardPage() {
           {/* Быстрые действия */}
           <div className="card mb-8">
             <h2 className="text-xl font-bold text-gray-900 mb-6">Быстрые действия</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
               <button className="btn-primary text-sm py-3" onClick={() => setSlotModalOpen(true)}>
                 Добавить слот
               </button>
@@ -254,6 +256,9 @@ export default function PsychologistDashboardPage() {
               </button>
               <button className="btn-secondary text-sm py-3" onClick={() => setProfileModalOpen(true)}>
                 Редактировать профиль
+              </button>
+              <button className="btn-secondary text-sm py-3" onClick={() => router.push('/psychologist/articles')}>
+                Написать статью
               </button>
             </div>
           </div>

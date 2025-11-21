@@ -13,6 +13,7 @@ interface Article {
   excerpt: string
   content: string
   category: string
+  displayAuthor: string | null
   tags: string[]
   coverImage: string | null
   viewCount: number
@@ -149,9 +150,9 @@ export default function ArticlePage() {
                 {article.viewCount} просмотров
               </div>
 
-              {article.author?.fullName && (
+              {(article.displayAuthor || article.author?.fullName) && (
                 <div className="flex items-center text-sm text-slate-600">
-                  Автор: {article.author.fullName}
+                  Автор: {article.displayAuthor || article.author?.fullName}
                 </div>
               )}
             </div>
@@ -211,4 +212,3 @@ export default function ArticlePage() {
     </div>
   )
 }
-

@@ -5,12 +5,21 @@ import Link from 'next/link'
 import { useEffect, useState } from 'react'
 import { BookOpen, Clock, Search, Video, Brain, Heart, Activity, PenSquare } from 'lucide-react'
 
+const CATEGORY_LABELS: Record<string, string> = {
+  SYMPTOMS: 'Симптомы',
+  METHODS: 'Методы лечения',
+  SELF_HELP: 'Самопомощь',
+  STORIES: 'Истории',
+  NEWS: 'Новости',
+}
+
 interface Article {
   id: string
   title: string
   slug: string
   excerpt: string
   category: string
+  displayAuthor: string | null
   coverImage: string | null
   viewCount: number
 }
@@ -160,10 +169,13 @@ export default function ResourcesPage() {
                         <BookOpen className="h-10 w-10 text-slate-400" />
                       </div>
                     )}
-                    <span className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-slate-700">{article.category}</span>
+                    <span className="absolute bottom-4 left-4 rounded-full bg-white/90 px-3 py-1 text-xs font-medium text-slate-700">
+                      {CATEGORY_LABELS[article.category] || article.category}
+                    </span>
                   </div>
                   <h3 className="mt-4 text-lg font-semibold text-slate-900">{article.title}</h3>
                   <p className="mt-2 text-sm text-slate-600 line-clamp-2">{article.excerpt}</p>
+                  {article.displayAuthor && <p className="mt-2 text-xs text-slate-500">Автор: {article.displayAuthor}</p>}
                   <span className="mt-3 inline-flex items-center text-xs text-slate-500">
                     <Clock className="mr-1 h-3 w-3" />
                     {article.viewCount} просмотров

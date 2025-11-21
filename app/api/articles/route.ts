@@ -13,6 +13,7 @@ export async function GET() {
         slug: true,
         excerpt: true,
         category: true,
+        displayAuthor: true,
         tags: true,
         coverImage: true,
         viewCount: true,
@@ -26,4 +27,3 @@ export async function GET() {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

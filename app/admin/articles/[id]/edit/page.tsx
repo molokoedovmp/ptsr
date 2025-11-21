@@ -21,6 +21,7 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
     tags: '',
     coverImage: '',
     published: false,
+    displayAuthor: '',
   })
 
   useEffect(() => {
@@ -38,6 +39,7 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
           excerpt: data.article.excerpt,
           content: data.article.content,
           category: data.article.category,
+          displayAuthor: data.article.displayAuthor || '',
           tags: data.article.tags.join(', '),
           coverImage: data.article.coverImage || '',
           published: data.article.published,
@@ -172,6 +174,18 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Автор (для отображения)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.displayAuthor}
+                    onChange={(e) => setFormData(prev => ({ ...prev, displayAuthor: e.target.value }))}
+                    className="input-field"
+                    placeholder="Например, Анна Петрова, психолог"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
                     Категория *
                   </label>
                   <select
@@ -251,4 +265,3 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
     </AdminProtectedRoute>
   )
 }
-

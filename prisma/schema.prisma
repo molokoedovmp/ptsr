@@ -18,6 +18,7 @@ model User {
   gender              Gender               @default(NOT_SPECIFIED)
   country             String               @default("Россия")
   city                String?
+  worldview           String?
   emailVerified       DateTime?            @map("email_verified")
   createdAt           DateTime             @default(now()) @map("created_at")
   updatedAt           DateTime             @updatedAt @map("updated_at")
@@ -199,6 +200,9 @@ model Article {
   coverImage String?  @map("cover_image")
   authorId   String   @map("author_id")
   category   String
+  displayAuthor String? @map("display_author")
+  status     ArticleStatus @default(APPROVED)
+  moderationComment String? @map("moderation_comment")
   tags       String[]
   published  Boolean  @default(false)
   viewCount  Int      @default(0) @map("view_count")
@@ -209,6 +213,13 @@ model Article {
   @@index([published, createdAt])
   @@index([slug])
   @@map("articles")
+}
+
+enum ArticleStatus {
+  DRAFT
+  PENDING
+  APPROVED
+  REJECTED
 }
 
 model Video {

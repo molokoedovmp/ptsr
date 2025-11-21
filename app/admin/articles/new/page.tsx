@@ -20,6 +20,7 @@ export default function NewArticlePage() {
     tags: '',
     coverImage: '',
     published: false,
+    displayAuthor: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -161,6 +162,19 @@ export default function NewArticlePage() {
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Автор (для отображения)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.displayAuthor}
+                    onChange={(e) => setFormData(prev => ({ ...prev, displayAuthor: e.target.value }))}
+                    className="input-field"
+                    placeholder="Например, Анна Петрова, психолог"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Имя специалиста, которое увидит читатель</p>
+                </div>
                 {/* Категория */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -251,4 +265,3 @@ export default function NewArticlePage() {
     </AdminProtectedRoute>
   )
 }
-

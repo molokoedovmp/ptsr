@@ -6,12 +6,22 @@ import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import { FileText, Plus, Edit, Trash2, Eye, EyeOff } from 'lucide-react'
 
+const categoryLabels: Record<string, string> = {
+  SYMPTOMS: 'Симптомы',
+  METHODS: 'Методы лечения',
+  SELF_HELP: 'Самопомощь',
+  STORIES: 'Истории',
+  NEWS: 'Новости',
+}
+
 interface Article {
   id: string
   title: string
   slug: string
   excerpt: string
   category: string
+  displayAuthor: string | null
+  status: string
   published: boolean
   viewCount: number
   createdAt: string
@@ -175,7 +185,7 @@ export default function AdminArticlesPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span className="px-2 py-1 text-xs font-medium rounded-full bg-purple-100 text-purple-700">
-                          {article.category}
+                          {categoryLabels[article.category] || article.category}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

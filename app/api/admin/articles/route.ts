@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
-import { UserRole } from '@prisma/client'
+import { ArticleStatus, UserRole } from '@prisma/client'
 
 // Создание новой статьи
 export async function POST(request: NextRequest) {
@@ -46,6 +46,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Создаем статью
+    const status: ArticleStatus = data.status ?? (data.published ? ArticleStatus.APPROVED : ArticleStatus.DRAFT)
+
     const article = await prisma.article.create({
       data: {
         title: data.title,
@@ -53,9 +55,11 @@ export async function POST(request: NextRequest) {
         content: data.content,
         excerpt: data.excerpt,
         category: data.category,
+        displayAuthor: data.displayAuthor?.trim() || null,
         tags: data.tags || [],
         coverImage: data.coverImage || null,
-        published: data.published || false,
+        status,
+        published: status === ArticleStatus.APPROVED,
         authorId: session.user.id,
       },
     })
@@ -97,6 +101,8 @@ export async function GET(request: NextRequest) {
         slug: true,
         excerpt: true,
         category: true,
+        displayAuthor: true,
+        status: true,
         published: true,
         viewCount: true,
         createdAt: true,
@@ -112,4 +118,3 @@ export async function GET(request: NextRequest) {
     )
   }
 }
-
