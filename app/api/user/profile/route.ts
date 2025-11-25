@@ -29,6 +29,7 @@ export async function GET() {
       select: {
         id: true,
         email: true,
+        phone: true,
         fullName: true,
         avatarUrl: true,
         dateOfBirth: true,
@@ -58,7 +59,7 @@ export async function PATCH(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { fullName, avatarUrl, dateOfBirth, gender, city, country, worldview } = body
+    const { fullName, avatarUrl, dateOfBirth, gender, city, country, worldview, phone } = body
 
     const data: any = {}
 
@@ -67,6 +68,7 @@ export async function PATCH(request: NextRequest) {
     if (typeof city === 'string') data.city = city.trim() || null
     if (typeof country === 'string' && country.trim()) data.country = country.trim()
     if (typeof worldview === 'string' && worldviewOptions.includes(worldview)) data.worldview = worldview || null
+    if (typeof phone === 'string') data.phone = phone.trim() || null
 
     if (typeof dateOfBirth === 'string' && dateOfBirth) {
       const parsed = new Date(dateOfBirth)
@@ -85,6 +87,7 @@ export async function PATCH(request: NextRequest) {
       select: {
         id: true,
         email: true,
+        phone: true,
         fullName: true,
         avatarUrl: true,
         dateOfBirth: true,
@@ -101,4 +104,3 @@ export async function PATCH(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

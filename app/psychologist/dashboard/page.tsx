@@ -33,7 +33,16 @@ interface DashboardData {
     endTime: string
     status: string
     clientName?: string | null
+    clientEmail?: string | null
+    clientPhone?: string | null
+    clientMessage?: string | null
     notes?: string | null
+    bookedByUser?: {
+      id: string
+      fullName: string | null
+      email: string
+      phone: string | null
+    } | null
   }[]
 }
 
@@ -285,21 +294,42 @@ export default function PsychologistDashboardPage() {
                     {upcomingSessions.map((session) => {
                       const statusInfo = statusStyles[session.status] ?? statusStyles.AVAILABLE
                       return (
-                        <div key={session.id} className="border border-gray-200 rounded-xl p-4 hover:border-slate-300 transition-colors">
-                          <div className="flex flex-wrap items-start justify-between gap-3">
-                            <div>
-                              <p className="text-sm text-gray-500">
-                                <Clock className="inline w-4 h-4 mr-1" />
-                                {formatDateTime(session.startTime)} — {formatDateTime(session.endTime, false)}
+                      <div key={session.id} className="border border-gray-200 rounded-xl p-4 hover:border-slate-300 transition-colors">
+                        <div className="flex flex-wrap items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm text-gray-500">
+                              <Clock className="inline w-4 h-4 mr-1" />
+                              {formatDateTime(session.startTime)} — {formatDateTime(session.endTime, false)}
+                            </p>
+                            <p className="text-lg font-semibold text-gray-900 mt-1">
+                              {session.clientName || 'Свободный слот'}
+                            </p>
+                            {session.clientEmail && (
+                              <p className="text-sm text-gray-600 mt-1">
+                                Email:{' '}
+                                <a href={`mailto:${session.clientEmail}`} className="text-primary-600 hover:underline">
+                                  {session.clientEmail}
+                                </a>
                               </p>
-                              <p className="text-lg font-semibold text-gray-900 mt-1">
-                                {session.clientName || 'Свободный слот'}
+                            )}
+                            {session.clientPhone && (
+                              <p className="text-sm text-gray-600">
+                                Телефон:{' '}
+                                <a href={`tel:${session.clientPhone}`} className="text-primary-600 hover:underline">
+                                  {session.clientPhone}
+                                </a>
                               </p>
-                              {session.notes && <p className="text-sm text-gray-600 mt-2">Заметки: {session.notes}</p>}
-                            </div>
-                            <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusInfo.className}`}>
-                              {statusInfo.label}
-                            </span>
+                            )}
+                            {session.clientMessage && (
+                              <p className="text-sm text-gray-600 mt-2">
+                                Запрос: {session.clientMessage}
+                              </p>
+                            )}
+                            {session.notes && <p className="text-sm text-gray-600 mt-2">Заметки: {session.notes}</p>}
+                          </div>
+                          <span className={`px-3 py-1 text-xs font-semibold rounded-full ${statusInfo.className}`}>
+                            {statusInfo.label}
+                          </span>
                           </div>
                           <div className="flex flex-wrap gap-3 mt-4">
                             <button
@@ -427,6 +457,23 @@ export default function PsychologistDashboardPage() {
                         {formatDateTime(session.startTime)} — {formatDateTime(session.endTime, false)}
                       </p>
                       <p className="text-lg font-semibold text-gray-900 mt-1">{session.clientName}</p>
+                      {session.clientEmail && (
+                        <p className="text-sm text-gray-600">
+                          Email:{' '}
+                          <a href={`mailto:${session.clientEmail}`} className="text-primary-600 hover:underline">
+                            {session.clientEmail}
+                          </a>
+                        </p>
+                      )}
+                      {session.clientPhone && (
+                        <p className="text-sm text-gray-600">
+                          Телефон:{' '}
+                          <a href={`tel:${session.clientPhone}`} className="text-primary-600 hover:underline">
+                            {session.clientPhone}
+                          </a>
+                        </p>
+                      )}
+                      {session.clientMessage && <p className="text-sm text-gray-600 mt-1">Запрос: {session.clientMessage}</p>}
                       {session.notes && <p className="text-sm text-gray-600 mt-1">Заметки: {session.notes}</p>}
                       <p className="text-xs text-gray-500 mt-2">Статус: {session.status}</p>
                     </div>

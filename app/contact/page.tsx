@@ -4,6 +4,17 @@ import { useState } from 'react'
 import Link from 'next/link'
 import { Mail, Phone, MapPin, Send } from 'lucide-react'
 
+const emergencyResources = [
+  { label: 'Скорая помощь / полиция', number: '102' },
+  { label: 'Линия помощи при самоубийствах / кризисных ситуациях', number: '+7 (495) 989-50-50' },
+  { label: 'Медицинская помощь', number: '103' },
+  { label: 'Общая чрезвычайная ситуация', number: '112' },
+  { label: 'Детский телефон доверия', number: '+7 (800) 2000-122' },
+  { label: 'Кризисный центр для женщин', number: '+7 (499) 977-17-05' },
+  { label: 'Экстренная психологическая помощь МЧС России', number: '+7 (495) 989-50-50', link: 'https://psi.mchs.gov.ru/' },
+  { label: 'Телефон доверия для женщин', number: '+7 (800) 101-64-79', link: 'https://tineodna.ru/#how' },
+]
+
 export default function ContactPage() {
   const [formData, setFormData] = useState({
     name: '',
@@ -61,6 +72,27 @@ export default function ContactPage() {
                 Написать нам
               </Link>
             </div>
+          </div>
+        </section>
+
+        <section className="bg-white rounded-3xl shadow-xl border border-emerald-100 p-8 space-y-6">
+          <p className="text-sm uppercase tracking-[0.3em] text-emerald-500">Обратитесь за помощью прямо сейчас</p>
+          <h2 className="text-3xl font-bold text-slate-900">Если вы переживаете кризис или кому-то угрожает опасность</h2>
+          <p className="text-slate-600">
+            Свяжитесь с экстренными службами — эти ресурсы работают круглосуточно и оказывают немедленную помощь.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {emergencyResources.map((item) => (
+              <div key={item.label} className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3">
+                <p className="text-sm font-semibold text-slate-900">{item.label}</p>
+                <p className="text-lg text-emerald-600">{item.number}</p>
+                {item.link && (
+                  <a href={item.link} target="_blank" rel="noreferrer" className="text-xs text-slate-500 underline">
+                    {item.link}
+                  </a>
+                )}
+              </div>
+            ))}
           </div>
         </section>
 
@@ -197,6 +229,15 @@ export default function ContactPage() {
             </div>
           </div>
         </section>
+        <div className="border-t border-slate-200 pt-8">
+          <p className="text-xs text-slate-500 max-w-4xl">
+            Команда цифровой платформы «ПТСР Эксперт. Онлайн» не несёт ответственности за профессиональные качества и услуги организаций, перечисленных выше. Включение в список не означает одобрения, порядок не является ранжированием. Мы не гарантируем точность контактов. Если вы обнаружили неточности или хотите добавить информацию о службах в вашем городе, напишите нам на{' '}
+            <a href="mailto:adress@ptsr-expert.ru" className="underline">
+              adress@ptsr-expert.ru
+            </a>{' '}
+            — мы обновим данные.
+          </p>
+        </div>
       </div>
     </div>
   )

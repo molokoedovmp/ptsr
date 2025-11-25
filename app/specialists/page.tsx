@@ -111,6 +111,13 @@ export default function SpecialistsPage() {
               Подобрать специалиста
             </Link>
           </div>
+          <p className="text-sm text-emerald-100/80 max-w-3xl">
+            Если вы переживаете кризис или кому-то угрожает опасность,{' '}
+            <Link href="/contact" className="underline font-semibold">
+              перейдите на страницу с экстренными ресурсами
+            </Link>{' '}
+            и обратитесь за немедленной помощью.
+          </p>
         </div>
       </section>
 

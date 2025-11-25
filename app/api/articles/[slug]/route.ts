@@ -11,16 +11,24 @@ export async function GET(
 
     console.log('[API] Fetching article with slug:', slug)
 
+    const now = new Date()
     const article = await prisma.article.findFirst({
       where: {
         slug: slug,
         published: true,
+        status: 'APPROVED',
+        OR: [{ publishedAt: null }, { publishedAt: { lte: now } }],
       },
       include: {
         author: {
           select: {
             fullName: true,
             avatarUrl: true,
+          },
+        },
+        feedback: {
+          select: {
+            rating: true,
           },
         },
       },
@@ -51,4 +59,3 @@ export async function GET(
     }, { status: 500 })
   }
 }
-

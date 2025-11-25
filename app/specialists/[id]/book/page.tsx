@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useSearchParams } from 'next/navigation'
+import { useSession } from 'next-auth/react'
 import { Calendar, Clock, Send } from 'lucide-react'
 
 interface Slot {
@@ -25,18 +26,30 @@ interface SpecialistResponse {
   }
 }
 
+interface UserProfileResponse {
+  user: {
+    fullName: string | null
+    email: string
+    phone: string | null
+  }
+}
+
 interface PageProps {
   params: { id: string }
 }
 
 export default function BookSpecialistPage({ params }: PageProps) {
+  const { status } = useSession()
   const [data, setData] = useState<SpecialistResponse['psychologist'] | null>(null)
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [error, setError] = useState('')
+  const [loadError, setLoadError] = useState('')
+  const [formError, setFormError] = useState<string | null>(null)
   const searchParams = useSearchParams()
   const initialSlotId = searchParams.get('slotId') ?? ''
+  const [profileLoading, setProfileLoading] = useState(status === 'loading')
+  const [profilePrefillError, setProfilePrefillError] = useState<string | null>(null)
 
   const [formData, setFormData] = useState({
     name: '',
@@ -60,7 +73,7 @@ export default function BookSpecialistPage({ params }: PageProps) {
           setFormData((prev) => ({ ...prev, slotId: json.psychologist.slots[0].id }))
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Ошибка загрузки')
+        setLoadError(err instanceof Error ? err.message : 'Ошибка загрузки')
       } finally {
         setLoading(false)
       }
@@ -68,6 +81,55 @@ export default function BookSpecialistPage({ params }: PageProps) {
 
     fetchSpecialist()
   }, [params.id, initialSlotId])
+
+  useEffect(() => {
+    if (status === 'loading') {
+      setProfileLoading(true)
+      return
+    }
+
+    if (status !== 'authenticated') {
+      setProfileLoading(false)
+      return
+    }
+
+    let isActive = true
+
+    const fetchProfile = async () => {
+      setProfileLoading(true)
+      setProfilePrefillError(null)
+      try {
+        const response = await fetch('/api/user/profile', { cache: 'no-store' })
+        if (!response.ok) {
+          throw new Error('Не удалось загрузить профиль')
+        }
+        const json: UserProfileResponse = await response.json()
+        if (isActive && json.user) {
+          setFormData((prev) => ({
+            ...prev,
+            name: prev.name || json.user.fullName || '',
+            email: prev.email || json.user.email || '',
+            phone: prev.phone || json.user.phone || '',
+          }))
+        }
+      } catch (err) {
+        if (isActive) {
+          console.error('Profile prefill error:', err)
+          setProfilePrefillError('Не удалось автоматически заполнить данные профиля. Заполните поля вручную.')
+        }
+      } finally {
+        if (isActive) {
+          setProfileLoading(false)
+        }
+      }
+    }
+
+    fetchProfile()
+
+    return () => {
+      isActive = false
+    }
+  }, [status])
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target
@@ -77,13 +139,48 @@ export default function BookSpecialistPage({ params }: PageProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setSubmitting(true)
-    setError('')
+    setFormError(null)
+
+    if (!formData.slotId) {
+      setFormError('Выберите слот из списка')
+      setSubmitting(false)
+      return
+    }
+
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200))
+      const response = await fetch('/api/consultations/book', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          psychologistId: params.id,
+          slotId: formData.slotId,
+          name: formData.name.trim(),
+          email: formData.email.trim(),
+          phone: formData.phone.trim(),
+          message: formData.message.trim(),
+        }),
+      })
+      const json = await response.json()
+      if (!response.ok) throw new Error(json.error || 'Не удалось отправить заявку')
+
+      const bookedSlotId = formData.slotId
+      let nextSlotId = ''
+      setData((prev) => {
+        if (!prev) return prev
+        const updatedSlots = prev.slots.filter((slot) => slot.id !== bookedSlotId)
+        nextSlotId = updatedSlots[0]?.id ?? ''
+        return { ...prev, slots: updatedSlots }
+      })
+
+      setFormData((prev) => ({
+        ...prev,
+        slotId: nextSlotId,
+        message: '',
+      }))
+
       setSubmitted(true)
-      setFormData((prev) => ({ ...prev, message: '' }))
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Не удалось отправить заявку')
+      setFormError(err instanceof Error ? err.message : 'Не удалось отправить заявку')
     } finally {
       setSubmitting(false)
     }
@@ -113,11 +210,11 @@ export default function BookSpecialistPage({ params }: PageProps) {
     )
   }
 
-  if (!data || error) {
+  if (!data || loadError) {
     return (
       <div className="min-h-screen bg-white flex items-center justify-center text-center px-6">
         <div className="space-y-4">
-          <p className="text-lg text-slate-700">{error || 'Специалист не найден'}</p>
+          <p className="text-lg text-slate-700">{loadError || 'Специалист не найден'}</p>
           <Link href="/specialists" className="text-emerald-600 font-semibold">
             Вернуться к списку специалистов
           </Link>
@@ -178,6 +275,35 @@ export default function BookSpecialistPage({ params }: PageProps) {
             {submitted && (
               <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 px-4 py-3 text-emerald-700 text-sm">
                 Заявка отправлена. Координатор свяжется с вами по указанной почте для подтверждения времени.
+              </div>
+            )}
+            {formError && (
+              <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {formError}
+              </div>
+            )}
+            {status !== 'authenticated' && status !== 'loading' && (
+              <div className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+                <p className="font-medium text-slate-800">Авторизуйтесь, чтобы мы автоматически подставили ваши данные профиля.</p>
+                <p className="mt-1 text-slate-500">Так запись займет меньше времени, но вы всегда можете заполнить форму вручную.</p>
+                <div className="mt-3 flex flex-wrap gap-3">
+                  <Link href="/login" className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white">
+                    Войти
+                  </Link>
+                  <Link href="/register" className="inline-flex items-center justify-center rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700">
+                    Создать аккаунт
+                  </Link>
+                </div>
+              </div>
+            )}
+            {status === 'authenticated' && profileLoading && (
+              <div className="rounded-2xl border border-slate-100 bg-slate-50 px-4 py-3 text-sm text-slate-500">
+                Загружаем данные вашего профиля...
+              </div>
+            )}
+            {profilePrefillError && (
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-700">
+                {profilePrefillError}
               </div>
             )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -262,4 +388,3 @@ export default function BookSpecialistPage({ params }: PageProps) {
     </div>
   )
 }
-

@@ -20,7 +20,7 @@ export default async function SpecialistDetailPage({ params }: SpecialistPagePro
         },
       },
       slots: {
-        where: { status: 'AVAILABLE' },
+        where: { status: 'AVAILABLE', startTime: { gte: new Date() } },
         orderBy: { startTime: 'asc' },
         take: 6,
       },
@@ -169,4 +169,3 @@ export default async function SpecialistDetailPage({ params }: SpecialistPagePro
     </div>
   )
 }
-

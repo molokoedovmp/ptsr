@@ -27,6 +27,11 @@ export async function GET(
 
     const article = await prisma.article.findUnique({
       where: { id: params.id },
+      include: {
+        author: {
+          select: { fullName: true, email: true },
+        },
+      },
     })
 
     if (!article) {
@@ -75,13 +80,20 @@ export async function PATCH(
     if (data.displayAuthor !== undefined) dataUpdate.displayAuthor = data.displayAuthor?.trim() || null
     if (data.tags) dataUpdate.tags = data.tags
     if (data.coverImage !== undefined) dataUpdate.coverImage = data.coverImage
+    if (data.readingMinutes !== undefined) dataUpdate.readingMinutes = data.readingMinutes ? Number(data.readingMinutes) : null
+    if (data.sourceTitle !== undefined) dataUpdate.sourceTitle = data.sourceTitle?.trim() || null
+    if (data.sourceUrl !== undefined) dataUpdate.sourceUrl = data.sourceUrl?.trim() || null
+    if (data.publishedAt !== undefined) dataUpdate.publishedAt = data.publishedAt ? new Date(data.publishedAt) : null
+    if (data.verifiedAt !== undefined) dataUpdate.verifiedAt = data.verifiedAt ? new Date(data.verifiedAt) : null
+    if (data.faq) dataUpdate.faq = data.faq.filter((item: any) => item.question && item.answer)
     if (data.published !== undefined) dataUpdate.published = data.published
     if (data.moderationComment !== undefined) dataUpdate.moderationComment = data.moderationComment
     if (data.status && Object.values(ArticleStatus).includes(data.status)) {
       dataUpdate.status = data.status
       if (data.status === ArticleStatus.APPROVED) {
-        dataUpdate.published = true
-      } else if (data.status === ArticleStatus.REJECTED || data.status === ArticleStatus.PENDING || data.status === ArticleStatus.DRAFT) {
+        dataUpdate.published = dataUpdate.publishedAt ? dataUpdate.publishedAt <= new Date() : true
+        dataUpdate.verifiedAt = dataUpdate.verifiedAt ?? new Date()
+      } else if ([ArticleStatus.REJECTED, ArticleStatus.PENDING, ArticleStatus.DRAFT].includes(data.status)) {
         dataUpdate.published = false
       }
     }

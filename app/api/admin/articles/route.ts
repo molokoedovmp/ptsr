@@ -47,6 +47,10 @@ export async function POST(request: NextRequest) {
 
     // Создаем статью
     const status: ArticleStatus = data.status ?? (data.published ? ArticleStatus.APPROVED : ArticleStatus.DRAFT)
+    const publishedAt = data.publishedAt ? new Date(data.publishedAt) : null
+    const now = new Date()
+    const readingMinutes = data.readingMinutes ? Number(data.readingMinutes) : null
+    const faq = Array.isArray(data.faq) ? data.faq.filter((item: any) => item.question && item.answer) : null
 
     const article = await prisma.article.create({
       data: {
@@ -56,10 +60,16 @@ export async function POST(request: NextRequest) {
         excerpt: data.excerpt,
         category: data.category,
         displayAuthor: data.displayAuthor?.trim() || null,
+        readingMinutes,
+        sourceTitle: data.sourceTitle?.trim() || null,
+        sourceUrl: data.sourceUrl?.trim() || null,
+        publishedAt,
+        verifiedAt: status === ArticleStatus.APPROVED ? new Date() : null,
+        faq,
         tags: data.tags || [],
         coverImage: data.coverImage || null,
         status,
-        published: status === ArticleStatus.APPROVED,
+        published: status === ArticleStatus.APPROVED && (!publishedAt || publishedAt <= now),
         authorId: session.user.id,
       },
     })

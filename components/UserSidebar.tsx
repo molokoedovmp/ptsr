@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { useAuth } from '@/contexts/AuthContext'
-import { BookOpen, Award, FileText, Heart, Settings, LogOut, BarChart3, User } from 'lucide-react'
+import { BookOpen, Award, FileText, Heart, Settings, LogOut, BarChart3, User, Bookmark } from 'lucide-react'
 import { signOut } from 'next-auth/react'
 
 interface NavItem {
@@ -25,6 +25,7 @@ export default function UserSidebar() {
     { id: 'mood', label: 'Дневник настроения', href: '/mood-diary', icon: <Heart className="w-5 h-5" /> },
     { id: 'certificates', label: 'Сертификаты', href: '/certificates', icon: <Award className="w-5 h-5" /> },
     { id: 'tests', label: 'Результаты тестов', href: '/profile/tests', icon: <FileText className="w-5 h-5" /> },
+    { id: 'saved', label: 'Сохранённые статьи', href: '/profile/saved', icon: <Bookmark className="w-5 h-5" /> },
     { id: 'settings', label: 'Настройки', href: '/settings', icon: <Settings className="w-5 h-5" /> },
   ]
 

@@ -34,6 +34,9 @@ model User {
   transactions        Transaction[]
   activityLogs        ActivityLog[]        // ← Добавлено
   anxietyTestResults  AnxietyTestResult[]
+  articleFeedbacks    ArticleFeedback[]
+  articleBookmarks    ArticleBookmark[]
+  consultationBookings ConsultationSlot[]  @relation("UserConsultationBookings")
 
   @@map("users")
 }
@@ -175,12 +178,18 @@ model ConsultationSlot {
   endTime         DateTime    @map("end_time")
   status          SlotStatus  @default(AVAILABLE)
   clientName      String?     @map("client_name")
+  clientEmail     String?     @map("client_email")
+  clientPhone     String?     @map("client_phone")
+  clientMessage   String?     @map("client_message")
+  bookedByUserId  String?     @map("booked_by_user_id")
   notes           String?
   createdAt       DateTime    @default(now()) @map("created_at")
   updatedAt       DateTime    @updatedAt @map("updated_at")
   psychologist    PsychologistProfile @relation(fields: [psychologistId], references: [id], onDelete: Cascade)
+  bookedByUser    User?       @relation("UserConsultationBookings", fields: [bookedByUserId], references: [id], onDelete: SetNull)
 
   @@index([psychologistId, startTime])
+  @@index([bookedByUserId])
   @@map("consultation_slots")
 }
 
@@ -203,16 +212,60 @@ model Article {
   displayAuthor String? @map("display_author")
   status     ArticleStatus @default(APPROVED)
   moderationComment String? @map("moderation_comment")
+  verifiedAt DateTime? @map("verified_at")
+  readingMinutes Int? @map("reading_minutes")
+  sourceTitle String? @map("source_title")
+  sourceUrl   String? @map("source_url")
+  publishedAt DateTime? @map("published_at")
+  faq         Json?    @map("faq_items")
   tags       String[]
   published  Boolean  @default(false)
   viewCount  Int      @default(0) @map("view_count")
   createdAt  DateTime @default(now()) @map("created_at")
   updatedAt  DateTime @updatedAt @map("updated_at")
   author     User     @relation("ArticleAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  feedback   ArticleFeedback[]
+  bookmarks  ArticleBookmark[]
 
   @@index([published, createdAt])
   @@index([slug])
   @@map("articles")
+}
+
+model ArticleFeedback {
+  id        String   @id @default(cuid())
+  articleId String   @map("article_id")
+  userId    String?  @map("user_id")
+  rating    Int
+  comment   String?
+  createdAt DateTime @default(now()) @map("created_at")
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([articleId])
+  @@unique([articleId, userId])
+  @@map("article_feedback")
+}
+
+model ArticleBookmark {
+  id        String   @id @default(cuid())
+  articleId String   @map("article_id")
+  userId    String   @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+  article   Article  @relation(fields: [articleId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([articleId, userId])
+  @@index([userId, createdAt])
+  @@map("article_bookmarks")
+}
+
+model ArticleSubscription {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("article_subscriptions")
 }
 
 enum ArticleStatus {

@@ -149,7 +149,7 @@ export default function ResourcesPage() {
               <h2 className="text-3xl font-heading text-slate-900">Аналитика и практические обзоры</h2>
             </div>
             {articles.length > 0 && (
-              <Link href="/resources?category=articles" className="text-sm font-semibold text-brand-teal hover:text-brand-teal/80">
+              <Link href="/articles" className="text-sm font-semibold text-brand-teal hover:text-brand-teal/80">
                 Все статьи →
               </Link>
             )}

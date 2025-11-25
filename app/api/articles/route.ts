@@ -1,10 +1,16 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
+import { ArticleStatus } from '@prisma/client'
 
 export async function GET() {
   try {
+    const now = new Date()
     const articles = await prisma.article.findMany({
-      where: { published: true },
+      where: {
+        published: true,
+        status: ArticleStatus.APPROVED,
+        OR: [{ publishedAt: null }, { publishedAt: { lte: now } }],
+      },
       orderBy: { createdAt: 'desc' },
       take: 10,
       select: {
@@ -14,10 +20,13 @@ export async function GET() {
         excerpt: true,
         category: true,
         displayAuthor: true,
+        readingMinutes: true,
         tags: true,
         coverImage: true,
         viewCount: true,
         createdAt: true,
+        verifiedAt: true,
+        publishedAt: true,
       },
     })
 

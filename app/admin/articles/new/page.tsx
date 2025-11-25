@@ -11,6 +11,7 @@ export default function NewArticlePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [faqs, setFaqs] = useState([{ question: '', answer: '' }])
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -21,6 +22,10 @@ export default function NewArticlePage() {
     coverImage: '',
     published: false,
     displayAuthor: '',
+    readingMinutes: '',
+    sourceTitle: '',
+    sourceUrl: '',
+    publishedAt: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -34,7 +39,10 @@ export default function NewArticlePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          readingMinutes: formData.readingMinutes ? Number(formData.readingMinutes) : null,
+          publishedAt: formData.publishedAt || null,
           tags: formData.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+          faq: faqs.filter(faq => faq.question && faq.answer),
         }),
       })
 
@@ -52,6 +60,12 @@ export default function NewArticlePage() {
       setLoading(false)
     }
   }
+
+  const addFaq = () => setFaqs((prev) => [...prev, { question: '', answer: '' }])
+  const updateFaq = (index: number, field: 'question' | 'answer', value: string) => {
+    setFaqs((prev) => prev.map((faq, i) => (i === index ? { ...faq, [field]: value } : faq)))
+  }
+  const removeFaq = (index: number) => setFaqs((prev) => prev.filter((_, i) => i !== index))
 
   const generateSlug = () => {
     const slug = formData.title
@@ -175,7 +189,6 @@ export default function NewArticlePage() {
                   />
                   <p className="text-xs text-gray-500 mt-1">Имя специалиста, которое увидит читатель</p>
                 </div>
-                {/* Категория */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Категория *
@@ -194,8 +207,6 @@ export default function NewArticlePage() {
                     <option value="NEWS">Новости</option>
                   </select>
                 </div>
-
-                {/* Теги */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Теги
@@ -207,24 +218,111 @@ export default function NewArticlePage() {
                     className="input-field"
                     placeholder="тег1, тег2, тег3"
                   />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Через запятую
-                  </p>
+                  <p className="text-xs text-gray-500 mt-1">Через запятую</p>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    URL обложки
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.coverImage}
+                    onChange={(e) => setFormData(prev => ({ ...prev, coverImage: e.target.value }))}
+                    className="input-field"
+                    placeholder="https://example.com/image.jpg"
+                  />
                 </div>
               </div>
 
-              {/* Обложка */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Время чтения (мин)
+                  </label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.readingMinutes}
+                    onChange={(e) => setFormData(prev => ({ ...prev, readingMinutes: e.target.value }))}
+                    className="input-field"
+                    placeholder="Например, 7"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Запланировать публикацию
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={formData.publishedAt}
+                    onChange={(e) => setFormData(prev => ({ ...prev, publishedAt: e.target.value }))}
+                    className="input-field"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">Если указать будущую дату, статья появится автоматически.</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Источник (название)
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.sourceTitle}
+                    onChange={(e) => setFormData(prev => ({ ...prev, sourceTitle: e.target.value }))}
+                    className="input-field"
+                    placeholder="Например, издание..."
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ссылка на источник
+                  </label>
+                  <input
+                    type="url"
+                    value={formData.sourceUrl}
+                    onChange={(e) => setFormData(prev => ({ ...prev, sourceUrl: e.target.value }))}
+                    className="input-field"
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  URL обложки
-                </label>
-                <input
-                  type="url"
-                  value={formData.coverImage}
-                  onChange={(e) => setFormData(prev => ({ ...prev, coverImage: e.target.value }))}
-                  className="input-field"
-                  placeholder="https://example.com/image.jpg"
-                />
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-sm font-medium text-gray-700">FAQ (вопросы и ответы)</label>
+                  <button type="button" onClick={addFaq} className="text-sm text-brand-teal font-semibold">
+                    Добавить вопрос
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {faqs.map((faq, index) => (
+                    <div key={index} className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                      <input
+                        type="text"
+                        value={faq.question}
+                        onChange={(e) => updateFaq(index, 'question', e.target.value)}
+                        className="input-field"
+                        placeholder="Вопрос"
+                      />
+                      <div className="flex gap-3">
+                        <textarea
+                          value={faq.answer}
+                          onChange={(e) => updateFaq(index, 'answer', e.target.value)}
+                          className="input-field flex-1"
+                          placeholder="Ответ"
+                          rows={2}
+                        />
+                        {faqs.length > 1 && (
+                          <button type="button" onClick={() => removeFaq(index)} className="text-red-500 text-sm">
+                            Удалить
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               </div>
 
               {/* Опубликовать */}

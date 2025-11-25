@@ -39,9 +39,19 @@ export async function GET() {
     }
 
     const slots = await prisma.consultationSlot.findMany({
-      where: { psychologistId: profile.id, startTime: { gte: new Date(Date.now() - 2 * 60 * 60 * 1000) } },
+      where: { psychologistId: profile.id, startTime: { gte: new Date() } },
       orderBy: { startTime: 'asc' },
-      take: 10,
+      take: 20,
+      include: {
+        bookedByUser: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
     })
 
     const data = {
@@ -85,7 +95,18 @@ export async function GET() {
         endTime: slot.endTime,
         status: slot.status,
         clientName: slot.clientName,
+        clientEmail: slot.clientEmail,
+        clientPhone: slot.clientPhone,
+        clientMessage: slot.clientMessage,
         notes: slot.notes,
+        bookedByUser: slot.bookedByUser
+          ? {
+              id: slot.bookedByUser.id,
+              fullName: slot.bookedByUser.fullName,
+              email: slot.bookedByUser.email,
+              phone: slot.bookedByUser.phone,
+            }
+          : null,
       })),
     }
 
