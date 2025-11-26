@@ -119,31 +119,28 @@ export default function HomePage() {
     <div className="min-h-screen flex flex-col bg-white text-slate-900">
       {showCookieBanner && (
         <div className="fixed bottom-0 left-0 right-0 z-[100] p-4 animate-in slide-in-from-bottom-10 duration-500">
-          <div className="rounded-lg border text-card-foreground max-w-3xl mx-auto shadow-2xl bg-background/90 backdrop-blur-sm border-border/50">
-            <div className="p-6">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-sm text-foreground text-center sm:text-left flex-grow">
-                  Эта цифровая платформа использует файлы cookie, чтобы обеспечить вам лучший опыт. Нажимая «Принять», вы
-                  соглашаетесь с использованием нами файлов cookie. Подробнее в нашей{' '}
-                  <Link href="/privacy-policy" className="underline hover:text-brand-teal font-medium">
-                    Политике конфиденциальности
-                  </Link>
-                  .
-                </p>
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <button
-                    onClick={() => handleCookieAction('declined')}
-                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 border border-input bg-background hover:bg-accent hover:text-accent-foreground shadow-sm hover:shadow-md transform hover:-translate-y-px h-10 px-4 py-2"
-                  >
-                    Отклонить
-                  </button>
-                  <button
-                    onClick={() => handleCookieAction('accepted')}
-                    className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-transform duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 bg-primary text-primary-foreground hover:bg-primary/90 shadow-md hover:shadow-lg transform hover:-translate-y-px h-10 px-4 py-2"
-                  >
-                    Принять
-                  </button>
-                </div>
+          <div className="max-w-3xl mx-auto rounded-2xl bg-white/95 text-slate-900 shadow-xl border border-slate-200 backdrop-blur">
+            <div className="p-5 md:p-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <p className="text-sm text-slate-700 flex-1 text-center md:text-left">
+                Мы используем файлы cookie, чтобы сайт работал корректно. Нажимая «Принять», вы соглашаетесь с их использованием. Подробнее в{' '}
+                <Link href="/privacy-policy" className="underline hover:text-brand-teal font-medium">
+                  Политике конфиденциальности
+                </Link>
+                .
+              </p>
+              <div className="flex items-center gap-2 justify-center md:justify-end">
+                <button
+                  onClick={() => handleCookieAction('declined')}
+                  className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+                >
+                  Отклонить
+                </button>
+                <button
+                  onClick={() => handleCookieAction('accepted')}
+                  className="inline-flex items-center justify-center rounded-full bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 shadow"
+                >
+                  Принять
+                </button>
               </div>
             </div>
           </div>
