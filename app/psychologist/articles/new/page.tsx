@@ -19,6 +19,7 @@ export default function PsychologistNewArticlePage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [faqs, setFaqs] = useState([{ question: '', answer: '' }])
   const [formData, setFormData] = useState({
     title: '',
     slug: '',
@@ -28,6 +29,10 @@ export default function PsychologistNewArticlePage() {
     tags: '',
     coverImage: '',
     displayAuthor: '',
+    readingMinutes: '',
+    sourceTitle: '',
+    sourceUrl: '',
+    publishedAt: '',
   })
 
   const generateSlug = () => {
@@ -87,7 +92,10 @@ export default function PsychologistNewArticlePage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          readingMinutes: formData.readingMinutes ? Number(formData.readingMinutes) : null,
+          publishedAt: formData.publishedAt || null,
           tags: formData.tags.split(',').map((tag) => tag.trim()).filter(Boolean),
+          faq: faqs.filter((f) => f.question && f.answer),
         }),
       })
       const json = await response.json()
@@ -106,10 +114,20 @@ export default function PsychologistNewArticlePage() {
       <div className="min-h-screen bg-gray-50 py-10">
         <div className="container-custom max-w-4xl">
           <div className="mb-8">
-            <Link href="/psychologist/articles" className="text-brand-teal hover:text-brand-teal/80 font-medium inline-flex items-center mb-4">
-              <ArrowLeft className="w-5 h-5 mr-2" />
-              Назад к статьям
-            </Link>
+            <div className="flex flex-wrap gap-3 mb-4">
+              <Link
+                href="/psychologist/dashboard"
+                className="inline-flex items-center px-4 py-2 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-50"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" /> В кабинет
+              </Link>
+              <Link
+                href="/psychologist/articles"
+                className="inline-flex items-center px-4 py-2 rounded-full text-brand-teal border border-brand-teal/30 bg-brand-teal/5 hover:bg-brand-teal/10"
+              >
+                <ArrowLeft className="w-5 h-5 mr-2" /> К списку статей
+              </Link>
+            </div>
             <h1 className="text-3xl font-bold text-slate-900 flex items-center">
               <FileText className="w-8 h-8 mr-3 text-emerald-600" />
               Новая статья
@@ -211,6 +229,98 @@ export default function PsychologistNewArticlePage() {
                     placeholder="https://..."
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Время чтения (минуты)</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={formData.readingMinutes}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, readingMinutes: e.target.value }))}
+                    className="input-field"
+                    placeholder="Например, 7"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Дата публикации (если нужна)</label>
+                  <input
+                    type="datetime-local"
+                    value={formData.publishedAt}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, publishedAt: e.target.value }))}
+                    className="input-field"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">Оставьте пустым, если дата не нужна</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Источник (название)</label>
+                  <input
+                    type="text"
+                    value={formData.sourceTitle}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, sourceTitle: e.target.value }))}
+                    className="input-field"
+                    placeholder="Например, название издания или автора"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">Ссылка на источник</label>
+                  <input
+                    type="url"
+                    value={formData.sourceUrl}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, sourceUrl: e.target.value }))}
+                    className="input-field"
+                    placeholder="https://..."
+                  />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="block text-sm font-medium text-slate-700">FAQ (вопрос–ответ)</label>
+                  <button
+                    type="button"
+                    className="text-brand-teal text-sm font-medium"
+                    onClick={() => setFaqs((prev) => [...prev, { question: '', answer: '' }])}
+                  >
+                    Добавить вопрос
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {faqs.map((faq, index) => (
+                    <div key={index} className="border border-slate-200 rounded-xl p-4 space-y-2">
+                      <input
+                        type="text"
+                        value={faq.question}
+                        onChange={(e) =>
+                          setFaqs((prev) => prev.map((item, i) => (i === index ? { ...item, question: e.target.value } : item)))
+                        }
+                        className="input-field"
+                        placeholder="Вопрос"
+                      />
+                      <textarea
+                        value={faq.answer}
+                        onChange={(e) =>
+                          setFaqs((prev) => prev.map((item, i) => (i === index ? { ...item, answer: e.target.value } : item)))
+                        }
+                        className="input-field"
+                        rows={2}
+                        placeholder="Ответ"
+                      />
+                      {faqs.length > 1 && (
+                        <div className="text-right">
+                          <button
+                            type="button"
+                            className="text-sm text-red-600 hover:text-red-700"
+                            onClick={() => setFaqs((prev) => prev.filter((_, i) => i !== index))}
+                          >
+                            Удалить
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
 
               <button type="submit" disabled={loading} className="btn-primary inline-flex items-center space-x-2">
@@ -224,4 +334,3 @@ export default function PsychologistNewArticlePage() {
     </PsychologistProtectedRoute>
   )
 }
-

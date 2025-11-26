@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json()
-    const { title, slug, excerpt, content, category, tags, coverImage, displayAuthor } = body
+    const { title, slug, excerpt, content, category, tags, coverImage, displayAuthor, readingMinutes, sourceTitle, sourceUrl, publishedAt, faq } = body
 
     if (!title || !slug || !excerpt || !content || !category) {
       return NextResponse.json({ error: 'Заполните обязательные поля' }, { status: 400 })
@@ -80,6 +80,11 @@ export async function POST(request: NextRequest) {
         tags: tags || [],
         coverImage: coverImage || null,
         displayAuthor: (displayAuthor || user.fullName || '').trim() || null,
+        readingMinutes: typeof readingMinutes === 'number' ? readingMinutes : null,
+        sourceTitle: sourceTitle || null,
+        sourceUrl: sourceUrl || null,
+        publishedAt: publishedAt ? new Date(publishedAt) : null,
+        faq: Array.isArray(faq) ? faq : undefined,
         authorId: session.user.id,
         status: ArticleStatus.DRAFT,
         published: false,
@@ -92,4 +97,3 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
-

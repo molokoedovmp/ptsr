@@ -52,6 +52,7 @@ export async function POST(request: Request) {
           roles,
           fullName: existingUser.fullName ?? application.fullName,
           phone: existingUser.phone ?? application.phone,
+          emailVerified: existingUser.emailVerified ?? new Date(),
         },
       })
       userId = updatedUser.id
@@ -63,6 +64,7 @@ export async function POST(request: Request) {
           fullName: application.fullName,
           phone: application.phone,
           roles: [UserRole.USER, UserRole.PSYCHOLOGIST],
+          emailVerified: new Date(),
         },
       })
       userId = newUser.id

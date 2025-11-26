@@ -199,69 +199,64 @@ export default function SpecialistsPage() {
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             {filteredSpecialists.map((specialist) => (
-              <div key={specialist.id} className="bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-xl transition-shadow p-6 flex gap-5">
-                <div className="w-20 h-20 rounded-2xl bg-emerald-50 flex items-center justify-center text-emerald-600 text-2xl font-semibold">
-                  {specialist.user.avatarUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={specialist.user.avatarUrl}
-                      alt={specialist.user.fullName ?? 'Специалист'}
-                      className="w-full h-full object-cover rounded-2xl"
-                    />
-                  ) : (
-                    (specialist.user.fullName?.[0] ?? 'П')
-                  )}
-                </div>
-                <div className="flex-1 space-y-4">
-                  <div className="flex flex-wrap items-start justify-between gap-3">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.2em] text-slate-400">психолог</p>
-                      <h3 className="text-2xl font-semibold text-slate-900">
-                        {specialist.user.fullName ?? 'Имя не указано'}
-                      </h3>
-                      <div className="flex items-center text-sm text-slate-500 mt-1">
-                        <Star className="w-4 h-4 text-yellow-400 mr-1" />
-                        <span>{(specialist.rating ?? 5).toFixed(1)} / 5.0</span>
-                        <span className="mx-2 text-slate-300">•</span>
-                        <Award className="w-4 h-4 text-emerald-500 mr-1" />
-                        <span>{specialist.experienceYears} лет опыта</span>
-                      </div>
-                    </div>
-                    <span
-                      className={`flex items-center text-xs font-semibold px-3 py-1 rounded-full ${
-                        specialist.available ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'
-                      }`}
-                    >
-                      <CheckCircle2 className="w-4 h-4 mr-1" />
-                      {specialist.available ? 'Принимает клиентов' : 'Недоступен'}
-                    </span>
-                  </div>
-                  <div className="flex flex-wrap gap-2">
-                    {specialist.specialization.slice(0, 4).map((spec) => (
-                      <span key={spec} className="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700">
-                        {spec}
+              <div
+                key={specialist.id}
+                className="bg-white rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-shadow p-6 flex flex-col gap-4"
+              >
+                <div className="flex flex-col md:flex-row md:items-center gap-4">
+                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-emerald-50 to-white border border-emerald-100 flex items-center justify-center overflow-hidden">
+                    {specialist.user.avatarUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={specialist.user.avatarUrl}
+                        alt={specialist.user.fullName ?? 'Специалист'}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-2xl font-semibold text-emerald-700">
+                        {specialist.user.fullName?.[0] ?? 'С'}
                       </span>
-                    ))}
+                    )}
                   </div>
-                  <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div>
-                      <p className="text-xs uppercase text-slate-400 tracking-[0.3em]">стоимость</p>
-                      <p className="text-3xl font-bold text-slate-900">{specialist.price.toLocaleString()} ₽</p>
-                      <p className="text-sm text-slate-500">за 60 минут</p>
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-center flex-wrap gap-2 text-sm text-slate-500">
+                      <span>{specialist.experienceYears} лет опыта</span>
                     </div>
-                    <div className="flex items-center gap-3">
-                      <Link href={`/specialists/${specialist.id}/book`} className="btn-primary inline-flex items-center space-x-2 px-4 py-2">
-                        <Calendar className="w-4 h-4" />
-                        <span>Записаться</span>
-                      </Link>
-                      <Link
-                        href={`/specialists/${specialist.id}`}
-                        className="text-emerald-700 font-medium text-sm inline-flex items-center hover:text-emerald-800"
-                      >
-                        Подробнее
-                        <ArrowRight className="w-4 h-4 ml-1" />
-                      </Link>
+                    <h3 className="text-2xl font-semibold text-slate-900 leading-tight">
+                      {specialist.user.fullName ?? 'Имя не указано'}
+                    </h3>
+                    <div className="flex flex-wrap gap-2">
+                      {specialist.specialization.slice(0, 4).map((spec) => (
+                        <span key={spec} className="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-50 text-emerald-700">
+                          {spec}
+                        </span>
+                      ))}
                     </div>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs font-semibold px-3 py-1 rounded-full border border-slate-200 text-slate-700 self-start md:self-center">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    {specialist.available ? 'Принимает клиентов' : 'Недоступен'}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center justify-between gap-3 border-t border-slate-100 pt-4">
+                  <div>
+                    <p className="text-xs uppercase text-slate-400 tracking-[0.3em]">стоимость</p>
+                    <p className="text-3xl font-bold text-slate-900">{specialist.price.toLocaleString()} ₽</p>
+                    <p className="text-sm text-slate-500">за 60 минут</p>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Link href={`/specialists/${specialist.id}/book`} className="btn-primary inline-flex items-center space-x-2 px-4 py-2">
+                      <Calendar className="w-4 h-4" />
+                      <span>Записаться</span>
+                    </Link>
+                    <Link
+                      href={`/specialists/${specialist.id}`}
+                      className="text-emerald-700 font-medium text-sm inline-flex items-center hover:text-emerald-800"
+                    >
+                      Подробнее
+                      <ArrowRight className="w-4 h-4 ml-1" />
+                    </Link>
                   </div>
                 </div>
               </div>

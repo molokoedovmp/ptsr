@@ -227,7 +227,7 @@ export default function BookSpecialistPage({ params }: PageProps) {
     <div className="min-h-screen bg-white">
       <section className="relative overflow-hidden text-white" style={{ backgroundImage: 'linear-gradient(110deg, rgba(5,5,5,0.8), rgba(5,5,5,0.6)), url(/assets/peaceful-meadow.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="container-custom py-16 relative z-10 space-y-4">
-          <p className="text-xs uppercase tracking-[0.3em] text-emerald-100">Запись к психологу</p>
+          <p className="text-xs uppercase tracking-[0.3em] text-emerald-100">Запись к специалисту</p>
           <h1 className="text-4xl font-bold">Записаться на консультацию</h1>
           <p className="text-emerald-50/90 max-w-3xl">
             Вы бронируете встречу со специалистом {data.user.fullName ?? 'Психолог'}.

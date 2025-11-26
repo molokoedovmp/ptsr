@@ -65,6 +65,8 @@ export default function PsychologistApplicationsPage() {
     }
   }
 
+  const pendingApplications = applications.filter((app) => app.status === 'PENDING')
+
   if (loading) {
     return (
       <AdminProtectedRoute>
@@ -87,12 +89,10 @@ export default function PsychologistApplicationsPage() {
                   <ClipboardList className="w-8 h-8 text-brand-teal" />
                   Заявки психологов
                 </h1>
-                <p className="text-gray-600 mt-2">
-                  Новых заявок: {applications.filter((app) => app.status === 'PENDING').length}
-                </p>
+                <p className="text-gray-600 mt-2">Новных заявок: {pendingApplications.length}</p>
               </div>
 
-              {applications.length === 0 ? (
+              {pendingApplications.length === 0 ? (
                 <div className="bg-white rounded-xl shadow-sm p-12 text-center">
                   <ClipboardList className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-xl font-semibold text-gray-900 mb-2">Пока нет заявок</h3>
@@ -100,7 +100,7 @@ export default function PsychologistApplicationsPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {applications.map((application) => (
+                  {pendingApplications.map((application) => (
                     <div key={application.id} className="bg-white rounded-2xl shadow-sm p-6 border border-slate-100">
                       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                         <div>

@@ -48,10 +48,8 @@ export async function GET(request: Request) {
       },
     })
 
-    // Удаляем использованный токен
-    await prisma.verificationToken.delete({
-      where: { token },
-    })
+    // Токен оставляем, чтобы повторные запросы (например, двойной рендер в dev) не давали "Неверный токен"
+    // Удалять можно периодически джобой по expires
 
     return NextResponse.json({
       success: true,
@@ -65,4 +63,3 @@ export async function GET(request: Request) {
     )
   }
 }
-

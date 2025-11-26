@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import PsychologistProtectedRoute from '@/components/psychologist/PsychologistProtectedRoute'
 import { Calendar, Users, Clock, TrendingUp, Settings, DollarSign, Star, ShieldCheck, CheckCircle, Trash2 } from 'lucide-react'
@@ -77,6 +77,7 @@ export default function PsychologistDashboardPage() {
   const [clientsModalOpen, setClientsModalOpen] = useState(false)
   const [profileModalOpen, setProfileModalOpen] = useState(false)
   const [slotModalOpen, setSlotModalOpen] = useState(false)
+  const [clientSearch, setClientSearch] = useState('')
 
   useEffect(() => {
     const fetchDashboard = async () => {
@@ -105,7 +106,18 @@ export default function PsychologistDashboardPage() {
   }, [])
 
   const upcomingSessions = data?.sessions || []
-  const bookedSessions = (data?.sessions || []).filter((session) => Boolean(session.clientName))
+  const bookedSessions = useMemo(() => {
+    const items = (data?.sessions || []).filter((session) => Boolean(session.clientName))
+    if (!clientSearch.trim()) return items
+    const q = clientSearch.toLowerCase()
+    return items.filter((session) => {
+      const name = session.clientName?.toLowerCase() || ''
+      const email = session.clientEmail?.toLowerCase() || ''
+      const phone = session.clientPhone?.toLowerCase() || ''
+      const msg = session.clientMessage?.toLowerCase() || ''
+      return name.includes(q) || email.includes(q) || phone.includes(q) || msg.includes(q)
+    })
+  }, [data?.sessions, clientSearch])
   const statusStyles: Record<string, { label: string; className: string }> = {
     AVAILABLE: { label: 'Свободен', className: 'bg-emerald-50 text-emerald-700' },
     BOOKED: { label: 'Забронирован', className: 'bg-blue-50 text-blue-700' },
@@ -246,7 +258,7 @@ export default function PsychologistDashboardPage() {
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 flex items-center">
               <Calendar className="w-8 h-8 mr-3 text-green-600" />
-              Кабинет психолога
+              Кабинет специалиста
             </h1>
             <p className="text-gray-600 mt-2">
               {data.profile.fullName ? `Здравствуйте, ${data.profile.fullName}!` : 'Управление консультациями и расписанием'}
@@ -437,58 +449,90 @@ export default function PsychologistDashboardPage() {
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-slate-900/50" onClick={() => setClientsModalOpen(false)} />
           <div className="absolute inset-0 flex items-center justify-center px-4">
-            <div className="bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 relative">
-              <div className="flex items-start justify-between mb-4">
+            <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full p-6 relative overflow-hidden">
+              <div className="flex flex-col gap-3 mb-4 md:flex-row md:items-center md:justify-between">
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">Клиенты на консультации</h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    Здесь отображаются клиенты, которые уже забронировали время. Чтобы закрыть окно, нажмите «Закрыть».
-                  </p>
+                  <p className="text-sm text-gray-600 mt-1">Быстрый поиск по имени, email, телефону или запросу.</p>
                 </div>
-                <button className="text-sm text-gray-500 hover:text-gray-800" onClick={() => setClientsModalOpen(false)}>
-                  Закрыть
-                </button>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={clientSearch}
+                    onChange={(e) => setClientSearch(e.target.value)}
+                    className="input w-full md:w-64"
+                    placeholder="Поиск клиента"
+                  />
+                  <button className="text-sm text-gray-500 hover:text-gray-800" onClick={() => setClientsModalOpen(false)}>
+                    Закрыть
+                  </button>
+                </div>
               </div>
+
               {bookedSessions.length > 0 ? (
-                <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
-                  {bookedSessions.map((session) => (
-                    <div key={session.id} className="border border-gray-200 rounded-xl p-4">
-                      <p className="text-sm text-gray-500">
-                        {formatDateTime(session.startTime)} — {formatDateTime(session.endTime, false)}
-                      </p>
-                      <p className="text-lg font-semibold text-gray-900 mt-1">{session.clientName}</p>
-                      {session.clientEmail && (
-                        <p className="text-sm text-gray-600">
-                          Email:{' '}
-                          <a href={`mailto:${session.clientEmail}`} className="text-primary-600 hover:underline">
-                            {session.clientEmail}
-                          </a>
-                        </p>
-                      )}
-                      {session.clientPhone && (
-                        <p className="text-sm text-gray-600">
-                          Телефон:{' '}
-                          <a href={`tel:${session.clientPhone}`} className="text-primary-600 hover:underline">
-                            {session.clientPhone}
-                          </a>
-                        </p>
-                      )}
-                      {session.clientMessage && <p className="text-sm text-gray-600 mt-1">Запрос: {session.clientMessage}</p>}
-                      {session.notes && <p className="text-sm text-gray-600 mt-1">Заметки: {session.notes}</p>}
-                      <p className="text-xs text-gray-500 mt-2">Статус: {session.status}</p>
+                <div className="border border-slate-200 rounded-xl overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <div className="min-w-[720px] max-h-[420px] overflow-y-auto">
+                      <table className="w-full text-sm">
+                        <thead className="bg-slate-50 sticky top-0 z-10">
+                          <tr className="text-left text-slate-600">
+                            <th className="px-4 py-3">Дата/время</th>
+                            <th className="px-4 py-3">Клиент</th>
+                            <th className="px-4 py-3">Контакты</th>
+                            <th className="px-4 py-3">Запрос</th>
+                            <th className="px-4 py-3">Статус</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {bookedSessions.map((session) => (
+                            <tr key={session.id} className="border-t border-slate-100 hover:bg-slate-50/60">
+                              <td className="px-4 py-3 align-top">
+                                <div className="font-semibold text-slate-900">{formatDateTime(session.startTime)}</div>
+                                <div className="text-slate-500 text-xs">{formatDateTime(session.endTime, false)}</div>
+                              </td>
+                              <td className="px-4 py-3 align-top">
+                                <div className="font-semibold text-slate-900">{session.clientName || 'Без имени'}</div>
+                                {session.bookedByUser?.fullName && (
+                                  <div className="text-xs text-slate-500">Аккаунт: {session.bookedByUser.fullName}</div>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 align-top text-slate-600 space-y-1">
+                                {session.clientEmail && (
+                                  <div>
+                                    Email:{' '}
+                                    <a href={`mailto:${session.clientEmail}`} className="text-primary-600 hover:underline">
+                                      {session.clientEmail}
+                                    </a>
+                                  </div>
+                                )}
+                                {session.clientPhone && (
+                                  <div>
+                                    Телефон:{' '}
+                                    <a href={`tel:${session.clientPhone}`} className="text-primary-600 hover:underline">
+                                      {session.clientPhone}
+                                    </a>
+                                  </div>
+                                )}
+                              </td>
+                              <td className="px-4 py-3 align-top text-slate-600">
+                                {session.clientMessage || '—'}
+                                {session.notes && <div className="text-xs text-slate-500 mt-1">Заметки: {session.notes}</div>}
+                              </td>
+                              <td className="px-4 py-3 align-top">
+                                <span className="inline-flex items-center px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold">
+                                  {session.status}
+                                </span>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
                     </div>
-                  ))}
+                  </div>
                 </div>
               ) : (
-                <p className="text-sm text-gray-600">
-                  Пока никто не забронировал консультацию. Как только клиент запишется, вы увидите его имя в этом списке.
-                </p>
+                <p className="text-sm text-gray-600">Пока никто не забронировал консультацию. Когда появятся клиенты, они будут здесь.</p>
               )}
-              <div className="mt-6">
-                <button className="btn-primary w-full" onClick={() => setClientsModalOpen(false)}>
-                  Понятно
-                </button>
-              </div>
             </div>
           </div>
         </div>

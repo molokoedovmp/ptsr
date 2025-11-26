@@ -1,6 +1,6 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { Calendar, Clock, Users, Star, Award, Phone } from 'lucide-react'
+import { Calendar, Clock, Users, Award, Phone } from 'lucide-react'
 import { prisma } from '@/lib/prisma'
 
 interface SpecialistPageProps {
@@ -42,7 +42,7 @@ export default async function SpecialistDetailPage({ params }: SpecialistPagePro
       <section className="relative overflow-hidden text-white" style={{ backgroundImage: 'linear-gradient(120deg, rgba(5,5,5,0.85), rgba(5,5,5,0.65)), url(/assets/peaceful-meadow.jpg)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
         <div className="container-custom py-16 relative z-10 grid grid-cols-1 lg:grid-cols-3 gap-8 items-center">
           <div className="space-y-4 lg:col-span-2">
-            <p className="text-xs uppercase tracking-[0.3em] text-emerald-100">психолог платформы</p>
+            <p className="text-xs uppercase tracking-[0.3em] text-emerald-100">специалист платформы</p>
             <h1 className="text-4xl md:text-5xl font-bold">{psychologist.user.fullName ?? 'Имя не указано'}</h1>
             <p className="text-emerald-50/90">
               {psychologist.bio ||
@@ -65,13 +65,6 @@ export default async function SpecialistDetailPage({ params }: SpecialistPagePro
             </div>
           </div>
           <div className="bg-white/10 backdrop-blur rounded-2xl border border-white/30 p-6 space-y-4">
-            <div className="flex items-center gap-3">
-              <Star className="w-8 h-8 text-yellow-300" />
-              <div>
-                <p className="text-sm text-emerald-50/80">Рейтинг</p>
-                <p className="text-3xl font-semibold">{(psychologist.rating ?? 4.9).toFixed(1)} / 5</p>
-              </div>
-            </div>
             <div className="grid grid-cols-1 gap-3">
               {stats.map((stat) => (
                 <div key={stat.label} className="flex items-center justify-between text-sm">
@@ -146,12 +139,15 @@ export default async function SpecialistDetailPage({ params }: SpecialistPagePro
           <div className="space-y-6">
             <div className="rounded-3xl border border-slate-100 p-6 bg-slate-50 shadow-inner">
               <h3 className="text-xl font-semibold text-slate-900 mb-2">С какими запросами работает</h3>
-              <ul className="space-y-2 text-slate-600 text-sm">
-                <li>• Посттравматическое стрессовое расстройство</li>
-                <li>• Панические атаки, тревога, стресс</li>
-                <li>• Последствия боевых действий и кризисных ситуаций</li>
-                <li>• Трудности адаптации, эмоциональное выгорание</li>
-              </ul>
+              {psychologist.specialization.length ? (
+                <ul className="space-y-2 text-slate-600 text-sm">
+                  {psychologist.specialization.map((item) => (
+                    <li key={item}>• {item}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-sm text-slate-600">Специалист пока не заполнил специализации.</p>
+              )}
             </div>
             <div className="rounded-3xl border border-emerald-200 p-6 bg-gradient-to-b from-emerald-50 to-white">
               <h3 className="text-xl font-semibold text-slate-900 mb-3">Готовы к консультации?</h3>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import PsychologistProtectedRoute from '@/components/psychologist/PsychologistProtectedRoute'
-import { FileText, Plus, Loader2 } from 'lucide-react'
+import { FileText, Plus, Loader2, ArrowLeft } from 'lucide-react'
 
 type ArticleSummary = {
   id: string
@@ -70,14 +70,22 @@ export default function PsychologistArticlesPage() {
           <div className="bg-white rounded-3xl shadow-xl p-8 space-y-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
               <div>
-                <p className="text-sm uppercase tracking-[0.3em] text-emerald-500">Психолог</p>
+                <p className="text-sm uppercase tracking-[0.3em] text-emerald-500">Специалист</p>
                 <h1 className="text-3xl font-bold text-slate-900">Мои статьи</h1>
                 <p className="text-slate-600">Пишите материалы и отправляйте их на модерацию редакции</p>
               </div>
-              <Link href="/psychologist/articles/new" className="btn-primary inline-flex items-center space-x-2">
-                <Plus className="w-5 h-5" />
-                <span>Новая статья</span>
-              </Link>
+              <div className="flex flex-wrap gap-2">
+                <Link
+                  href="/psychologist/dashboard"
+                  className="inline-flex items-center px-4 py-2 rounded-full border border-slate-200 text-slate-700 hover:bg-slate-50"
+                >
+                  <ArrowLeft className="w-5 h-5 mr-2" /> В кабинет
+                </Link>
+                <Link href="/psychologist/articles/new" className="btn-primary inline-flex items-center space-x-2">
+                  <Plus className="w-5 h-5" />
+                  <span>Новая статья</span>
+                </Link>
+              </div>
             </div>
 
             {loading ? (
@@ -154,4 +162,3 @@ export default function PsychologistArticlesPage() {
     </PsychologistProtectedRoute>
   )
 }
-
