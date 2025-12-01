@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import PsychologistProtectedRoute from '@/components/psychologist/PsychologistProtectedRoute'
-import { FileText, Plus, Loader2, ArrowLeft } from 'lucide-react'
+import { FileText, Plus, Loader2, ArrowLeft   } from 'lucide-react'
 
 type ArticleSummary = {
   id: string

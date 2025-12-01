@@ -1,131 +1,163 @@
 import React from 'react'
 import { Document, Page, Text, View, StyleSheet, Font } from '@react-pdf/renderer'
-import path from 'path'
 import fs from 'fs'
+import path from 'path'
 
-const PRIMARY_FONT_FAMILY = 'PTSRSans'
 const fontDir = path.join(process.cwd(), 'public', 'fonts')
 const regularFontPath = path.join(fontDir, 'NotoSans-Regular.ttf')
 const boldFontPath = path.join(fontDir, 'NotoSans-Bold.ttf')
 
-let fontsRegistered = false
+let PRIMARY_FONT_FAMILY = 'Helvetica'
 
-if (!fontsRegistered) {
-  try {
-    if (fs.existsSync(regularFontPath) && fs.existsSync(boldFontPath)) {
-      Font.register({
-        family: PRIMARY_FONT_FAMILY,
-        fonts: [
-          { src: regularFontPath, fontWeight: 'normal' },
-          { src: boldFontPath, fontWeight: 'bold' },
-        ],
-      })
-      fontsRegistered = true
-    } else {
-      console.warn('Certificate fonts not found. Default font will be used.')
-    }
-  } catch (error) {
-    console.error('Failed to register fonts for certificate:', error)
+// Пытаемся подключить NotoSans, если валидные файлы реально есть; иначе используем встроенную Helvetica.
+try {
+  if (fs.existsSync(regularFontPath) && fs.existsSync(boldFontPath)) {
+    Font.register({
+      family: 'PTSRSans',
+      fonts: [
+        { src: regularFontPath, fontWeight: 400 },
+        { src: boldFontPath, fontWeight: 700 },
+      ],
+    })
+    PRIMARY_FONT_FAMILY = 'PTSRSans'
   }
+} catch (err) {
+  PRIMARY_FONT_FAMILY = 'Helvetica'
+  console.warn('Falling back to default PDF font. To use custom Cyrillic font, place valid NotoSans *.ttf in public/fonts.', err)
 }
 
 // Стили для PDF
 const styles = StyleSheet.create({
   page: {
     backgroundColor: '#ffffff',
-    padding: 60,
+    padding: 50,
     fontFamily: PRIMARY_FONT_FAMILY,
   },
   container: {
-    border: '8px solid #0d9488',
-    padding: 40,
+    border: '6px solid #0d9488',
+    padding: 32,
     height: '100%',
-    display: 'flex',
     flexDirection: 'column',
     justifyContent: 'space-between',
+    gap: 24,
   },
-  header: {
-    textAlign: 'center',
-    marginBottom: 30,
+  headerRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  brandBlock: {
+    width: '30%',
+    gap: 4,
+  },
+  brandTitle: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#0d9488',
+  },
+  brandSubtitle: {
+    fontSize: 10,
+    color: '#64748b',
+  },
+  certBlock: {
+    width: '40%',
+    alignItems: 'center',
   },
   title: {
-    fontSize: 48,
+    fontSize: 28,
     fontWeight: 'bold',
     color: '#0d9488',
-    marginBottom: 10,
-    textTransform: 'uppercase',
     letterSpacing: 3,
+    textAlign: 'center',
+    textTransform: 'uppercase',
   },
   subtitle: {
-    fontSize: 16,
-    color: '#64748b',
-    marginBottom: 40,
-  },
-  content: {
-    textAlign: 'center',
-    flex: 1,
-    justifyContent: 'center',
-  },
-  text: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#475569',
-    marginBottom: 20,
-    lineHeight: 1.6,
+    textAlign: 'center',
+    marginTop: 6,
+  },
+  metaBlock: {
+    width: '30%',
+    alignItems: 'flex-end',
+    gap: 4,
+  },
+  metaLabel: {
+    fontSize: 10,
+    color: '#94a3b8',
+  },
+  metaValue: {
+    fontSize: 12,
+    color: '#0f172a',
+    fontWeight: 'bold',
+  },
+  section: {
+    alignItems: 'center',
+    textAlign: 'center',
+    gap: 8,
+  },
+  textCenter: {
+    fontSize: 12,
+    color: '#475569',
   },
   userName: {
-    fontSize: 36,
+    fontSize: 26,
     fontWeight: 'bold',
-    color: '#1e293b',
-    marginTop: 20,
-    marginBottom: 20,
-    textDecoration: 'underline',
+    color: '#0f172a',
+    marginVertical: 6,
   },
   courseName: {
-    fontSize: 24,
+    fontSize: 18,
     color: '#0d9488',
     fontWeight: 'bold',
-    marginTop: 30,
-    marginBottom: 30,
+    marginTop: 4,
+  },
+  infoGrid: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    borderTop: '1pt solid #e2e8f0',
+    borderBottom: '1pt solid #e2e8f0',
+    paddingVertical: 12,
+    marginTop: 10,
+  },
+  infoItem: {
+    width: '32%',
+    gap: 4,
+    alignItems: 'center',
+  },
+  infoLabel: {
+    fontSize: 10,
+    color: '#94a3b8',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+  },
+  infoValue: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    color: '#0f172a',
   },
   footer: {
-    marginTop: 40,
-    display: 'flex',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'flex-end',
+    marginTop: 8,
   },
   footerSection: {
     width: '45%',
   },
-  date: {
-    fontSize: 12,
-    color: '#64748b',
-    marginBottom: 5,
-  },
   signature: {
-    fontSize: 14,
-    color: '#1e293b',
+    fontSize: 12,
+    color: '#0f172a',
     fontWeight: 'bold',
-    borderTop: '2px solid #0d9488',
-    paddingTop: 5,
-    marginTop: 20,
+    borderTop: '1pt solid #0d9488',
+    paddingTop: 6,
+    marginTop: 12,
+    textAlign: 'left',
   },
   label: {
     fontSize: 10,
     color: '#94a3b8',
-    marginTop: 5,
-  },
-  certificateId: {
-    fontSize: 10,
-    color: '#94a3b8',
-    textAlign: 'center',
-    marginTop: 20,
-  },
-  decorativeLine: {
-    width: '100%',
-    height: 2,
-    backgroundColor: '#0d9488',
-    marginVertical: 20,
+    marginTop: 4,
   },
 })
 
@@ -135,6 +167,7 @@ interface CertificateTemplateProps {
   completionDate: string
   certificateId: string
   duration: string
+  moduleCount: number
 }
 
 const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
@@ -143,55 +176,60 @@ const CertificateTemplate: React.FC<CertificateTemplateProps> = ({
   completionDate,
   certificateId,
   duration,
+  moduleCount,
 }) => (
   <Document>
     <Page size="A4" orientation="landscape" style={styles.page}>
       <View style={styles.container}>
-        {/* Заголовок */}
-        <View style={styles.header}>
-          <Text style={styles.title}>Сертификат</Text>
-          <Text style={styles.subtitle}>о прохождении образовательной программы</Text>
+        <View style={styles.headerRow}>
+          <View style={styles.brandBlock}>
+            <Text style={styles.brandTitle}>ПТСР Эксперт</Text>
+            <Text style={styles.brandSubtitle}>Образовательная платформа</Text>
+          </View>
+          <View style={styles.certBlock}>
+            <Text style={styles.title}>СЕРТИФИКАТ</Text>
+            <Text style={styles.subtitle}>о завершении программы</Text>
+          </View>
+          <View style={styles.metaBlock}>
+            <Text style={styles.metaLabel}>Дата</Text>
+            <Text style={styles.metaValue}>{completionDate}</Text>
+            <Text style={styles.metaLabel}>ID</Text>
+            <Text style={styles.metaValue}>{certificateId}</Text>
+          </View>
         </View>
 
-        {/* Основной контент */}
-        <View style={styles.content}>
-          <Text style={styles.text}>Настоящий сертификат подтверждает, что</Text>
-          
+        <View style={styles.section}>
+          <Text style={styles.textCenter}>Настоящий сертификат подтверждает, что</Text>
           <Text style={styles.userName}>{userName}</Text>
-          
-          <Text style={styles.text}>
-            успешно завершил(а) образовательную программу
-          </Text>
-          
+          <Text style={styles.textCenter}>успешно прошёл(ла) курс</Text>
           <Text style={styles.courseName}>{courseName}</Text>
-          
-          <View style={styles.decorativeLine} />
-          
-          <Text style={styles.text}>
-            Продолжительность программы: {duration}
-          </Text>
-          <Text style={styles.text}>
-            Дата завершения: {completionDate}
-          </Text>
         </View>
 
-        {/* Футер */}
+        <View style={styles.infoGrid}>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoLabel}>Продолжительность</Text>
+            <Text style={styles.infoValue}>{duration}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoLabel}>Модулей в курсе</Text>
+            <Text style={styles.infoValue}>{moduleCount}</Text>
+          </View>
+          <View style={styles.infoItem}>
+            <Text style={styles.infoLabel}>Платформа</Text>
+            <Text style={styles.infoValue}>ПТСР Эксперт Онлайн</Text>
+          </View>
+        </View>
+
         <View style={styles.footer}>
           <View style={styles.footerSection}>
             <Text style={styles.signature}>ПТСР Эксперт</Text>
             <Text style={styles.label}>Образовательная платформа</Text>
           </View>
-          
           <View style={styles.footerSection}>
             <Text style={styles.signature}>Администрация</Text>
             <Text style={styles.label}>Подпись</Text>
           </View>
         </View>
-
-        {/* ID сертификата */}
-        <Text style={styles.certificateId}>
-          ID сертификата: {certificateId}
-        </Text>
       </View>
     </Page>
   </Document>

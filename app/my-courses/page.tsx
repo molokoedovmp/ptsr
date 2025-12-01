@@ -58,13 +58,13 @@ export default function MyCoursesPage() {
     }
   }
 
-  const handleGenerateCertificate = async (enrollmentId: string) => {
+  const handleGenerateCertificate = async (enrollmentId: string, force = false) => {
     setGeneratingCert(enrollmentId)
     try {
       const response = await fetch('/api/certificates/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ enrollmentId }),
+        body: JSON.stringify({ enrollmentId, force }),
       })
 
       if (response.ok) {
@@ -148,7 +148,7 @@ export default function MyCoursesPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-slate-100 py-12">
       <div className="container-custom">
-        <div className="flex gap-6">
+        <div className="flex flex-col lg:flex-row gap-6">
           <UserSidebar />
 
           <div className="flex-1 space-y-10">
@@ -340,10 +340,10 @@ export default function MyCoursesPage() {
                       {completedEnrollments.map((enrollment) => (
                         <div
                           key={enrollment.id}
-                          className="flex flex-col rounded-2xl border border-slate-200 bg-white shadow-sm"
+                          className="flex flex-col rounded-3xl border border-slate-200 bg-white shadow-md overflow-hidden"
                         >
                           <div className="p-6 space-y-4">
-                            <div className="flex items-center justify-between">
+                            <div className="flex flex-wrap items-center justify-between gap-3">
                               <span className="text-xs font-semibold uppercase tracking-[0.3em] text-emerald-600">
                                 Завершён {formatDate(enrollment.completedAt)}
                               </span>
@@ -355,9 +355,11 @@ export default function MyCoursesPage() {
                                 {enrollment.certificateUrl ? 'Сертификат готов' : 'Сертификат не получен'}
                               </span>
                             </div>
-                            <h3 className="text-xl font-semibold text-slate-900">{enrollment.course.title}</h3>
-                            <p className="text-sm text-slate-600 line-clamp-2">{enrollment.course.description}</p>
-                            <div className="flex flex-wrap gap-4 text-sm text-slate-500">
+                            <div className="space-y-2">
+                              <h3 className="text-2xl font-semibold text-slate-900">{enrollment.course.title}</h3>
+                              <p className="text-sm text-slate-600 line-clamp-2">{enrollment.course.description}</p>
+                            </div>
+                            <div className="flex flex-wrap gap-4 text-sm text-slate-600">
                               <div className="flex items-center gap-2">
                                 <Calendar className="w-4 h-4" />
                                 <span>Старт: {formatDate(enrollment.enrolledAt, '—')}</span>
@@ -368,28 +370,47 @@ export default function MyCoursesPage() {
                               </div>
                             </div>
                           </div>
-                          <div className="border-t border-slate-100 p-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="border-t border-slate-100 bg-slate-50/70 p-4 flex flex-col sm:flex-row flex-wrap gap-3">
                             <Link
                               href={`/learn/${enrollment.course.slug}?view=completed`}
-                              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:border-brand-teal hover:text-brand-teal transition-colors"
+                              className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:border-brand-teal hover:text-brand-teal transition-colors flex-1"
                             >
                               <Eye className="w-4 h-4" />
                               Пройденные уроки
                             </Link>
                             {enrollment.certificateUrl ? (
-                              <a
-                                href={enrollment.certificateUrl}
-                                download={`certificate-${enrollment.course.slug}.pdf`}
-                                className="flex items-center justify-center gap-2 rounded-xl bg-brand-teal text-white px-4 py-2 text-sm font-semibold hover:bg-brand-teal/90 transition-colors"
-                              >
-                                <Award className="w-4 h-4" />
-                                Скачать PDF
-                              </a>
+                              <>
+                                <a
+                                  href={enrollment.certificateUrl}
+                                  download={`certificate-${enrollment.course.slug}.pdf`}
+                                  className="flex items-center justify-center gap-2 rounded-xl bg-brand-teal text-white px-4 py-2 text-sm font-semibold hover:bg-brand-teal/90 transition-colors flex-1"
+                                >
+                                  <Award className="w-4 h-4" />
+                                  Скачать PDF
+                                </a>
+                                <button
+                                  onClick={() => handleGenerateCertificate(enrollment.id, true)}
+                                  disabled={generatingCert === enrollment.id}
+                                  className="flex items-center justify-center gap-2 rounded-xl border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-700 hover:border-brand-teal hover:text-brand-teal transition-colors disabled:opacity-60 flex-1"
+                                >
+                                  {generatingCert === enrollment.id ? (
+                                    <>
+                                      <RefreshCw className="w-4 h-4 animate-spin" />
+                                      Обновляем...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <RefreshCw className="w-4 h-4" />
+                                      Перегенерировать
+                                    </>
+                                  )}
+                                </button>
+                              </>
                             ) : (
                               <button
                                 onClick={() => handleGenerateCertificate(enrollment.id)}
                                 disabled={generatingCert === enrollment.id}
-                                className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition-colors disabled:opacity-60"
+                                className="flex items-center justify-center gap-2 rounded-xl bg-slate-900 text-white px-4 py-2 text-sm font-semibold hover:bg-slate-800 transition-colors disabled:opacity-60 flex-1"
                               >
                                 {generatingCert === enrollment.id ? (
                                   <>

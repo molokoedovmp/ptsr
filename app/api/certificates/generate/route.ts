@@ -14,7 +14,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { enrollmentId } = await request.json()
+    const { enrollmentId, force } = await request.json()
 
     if (!enrollmentId) {
       return NextResponse.json({ error: 'Enrollment ID is required' }, { status: 400 })
@@ -40,8 +40,8 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Если сертификат уже создан, возвращаем его
-    if (enrollment.certificateUrl) {
+    // Если сертификат уже создан и не просили пересоздать, возвращаем его
+    if (enrollment.certificateUrl && !force) {
       return NextResponse.json({ certificateUrl: enrollment.certificateUrl })
     }
 
@@ -64,6 +64,9 @@ export async function POST(request: NextRequest) {
     // Форматируем продолжительность
     const duration = `${enrollment.course.durationWeeks} ${getDurationText(enrollment.course.durationWeeks)}`
 
+    // Кол-во модулей в курсе
+    const moduleCount = await prisma.courseModule.count({ where: { courseId: enrollment.course.id } })
+
     // Генерируем PDF
     const stream = await renderToStream(
       CertificateTemplate({
@@ -72,6 +75,7 @@ export async function POST(request: NextRequest) {
         completionDate,
         certificateId,
         duration,
+        moduleCount,
       })
     )
 
@@ -107,4 +111,3 @@ function getDurationText(weeks: number): string {
   if (weeks >= 2 && weeks <= 4) return 'недели'
   return 'недель'
 }
-

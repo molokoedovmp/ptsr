@@ -48,7 +48,7 @@ export default function SavedArticlesPage() {
     <ProtectedRoute>
       <div className="min-h-screen bg-gradient-to-b from-white via-slate-50 to-slate-100 py-12">
         <div className="container-custom">
-          <div className="flex gap-6">
+          <div className="flex flex-col lg:flex-row gap-6">
             <UserSidebar />
             <div className="flex-1">
               <div className="mb-8">
@@ -92,4 +92,3 @@ export default function SavedArticlesPage() {
     </ProtectedRoute>
   )
 }
-

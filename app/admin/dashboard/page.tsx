@@ -87,7 +87,7 @@ export default function AdminDashboardPage() {
     <AdminProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="container-custom">
-          <div className="flex gap-6">
+          <div className="flex flex-col lg:flex-row gap-6">
             <AdminSidebar />
             <div className="flex-1">
               {/* Заголовок */}
@@ -285,4 +285,3 @@ export default function AdminDashboardPage() {
     </AdminProtectedRoute>
   )
 }
-

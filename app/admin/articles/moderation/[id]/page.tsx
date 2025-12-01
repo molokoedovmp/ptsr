@@ -84,7 +84,7 @@ export default function ModerationDetailPage({ params }: { params: { id: string 
     <AdminProtectedRoute>
       <div className="min-h-screen bg-gray-50 py-10">
         <div className="container-custom">
-          <div className="flex gap-6">
+          <div className="flex flex-col lg:flex-row gap-6">
             <AdminSidebar />
             <div className="flex-1 bg-white rounded-3xl shadow-xl p-8">
               <div className="mb-8">
@@ -156,4 +156,3 @@ export default function ModerationDetailPage({ params }: { params: { id: string 
     </AdminProtectedRoute>
   )
 }
-
