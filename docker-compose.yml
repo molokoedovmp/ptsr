@@ -25,7 +25,13 @@ services:
       - caddy_config:/config
     depends_on:
       - app
+    networks:
+      - proxy
 
 volumes:
   caddy_data:
   caddy_config:
+
+networks:
+  proxy:
+    external: true

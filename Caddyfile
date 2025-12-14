@@ -3,6 +3,10 @@
   reverse_proxy app:3000
 }
 
+ai-bazar.ru, www.ai-bazar.ru {
+  reverse_proxy aibazar-web:3000
+}
+
 # Если домен не указан, можно временно раскомментировать для локальной проверки:
 # :80 {
 #   reverse_proxy app:3000
