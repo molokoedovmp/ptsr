@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { sendPasswordResetEmail } from '@/lib/email'
+import { getRequestOrigin } from '@/lib/request'
 import crypto from 'crypto'
 
 export async function POST(request: Request) {
@@ -48,7 +49,10 @@ export async function POST(request: Request) {
     })
 
     // Отправляем email
-    const origin = request.headers.get('origin') || process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL
+    const origin =
+      getRequestOrigin(request.headers) ||
+      process.env.NEXTAUTH_URL ||
+      process.env.NEXT_PUBLIC_APP_URL
     await sendPasswordResetEmail(email, token, origin || undefined)
 
     return NextResponse.json({

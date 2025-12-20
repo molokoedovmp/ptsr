@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
+import { getClientIp } from '@/lib/request'
 
 export async function GET() {
   try {
@@ -56,11 +57,7 @@ export async function POST(req: Request) {
       ...(title ? { title } : {}),
     }
 
-    const ip =
-      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
-      req.headers.get('x-real-ip') ||
-      req.headers.get('cf-connecting-ip') ||
-      null
+    const ip = getClientIp(req.headers)
     const userAgent = req.headers.get('user-agent') || null
 
     const log = await prisma.activityLog.create({

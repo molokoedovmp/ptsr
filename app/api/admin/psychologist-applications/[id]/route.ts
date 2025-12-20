@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth'
 import { prisma } from '@/lib/prisma'
 import { ApplicationStatus, UserRole } from '@prisma/client'
 import { sendPsychologistApplicationStatusEmail, sendPsychologistActivationEmail } from '@/lib/email'
+import { getRequestOrigin } from '@/lib/request'
 import crypto from 'crypto'
 
 export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
@@ -52,7 +53,10 @@ export async function PATCH(request: NextRequest, { params }: { params: { id: st
       })
 
       try {
-        const origin = request.headers.get('origin') || process.env.NEXTAUTH_URL || process.env.NEXT_PUBLIC_APP_URL
+        const origin =
+          getRequestOrigin(request.headers) ||
+          process.env.NEXTAUTH_URL ||
+          process.env.NEXT_PUBLIC_APP_URL
         await sendPsychologistActivationEmail(application.email, token, origin || undefined)
       } catch (emailError) {
         console.error('Failed to send activation email:', emailError)

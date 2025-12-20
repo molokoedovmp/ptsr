@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
+import { getClientIp } from '@/lib/request'
 
 // Функция для определения типа устройства
 function getDeviceType(userAgent: string): string {
@@ -37,9 +38,7 @@ export async function POST(request: NextRequest) {
     
     // Получаем информацию о пользователе
     const userAgent = request.headers.get('user-agent') || ''
-    const ip = request.headers.get('x-forwarded-for') || 
-               request.headers.get('x-real-ip') || 
-               'unknown'
+    const ip = getClientIp(request.headers) || 'unknown'
 
     // Создаем запись аналитики
     await prisma.visitorAnalytics.create({
@@ -84,4 +83,3 @@ export async function POST(request: NextRequest) {
     )
   }
 }
-
