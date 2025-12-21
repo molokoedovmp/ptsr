@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { BookOpen, Clock, Search, Video, Brain, Heart, Activity, PenSquare } from 'lucide-react'
+import { BookOpen, Clock, Video, Brain, Heart, Activity, PenSquare } from 'lucide-react'
 
 const CATEGORY_LABELS: Record<string, string> = {
   SYMPTOMS: 'Симптомы',
@@ -107,33 +107,35 @@ export default function ResourcesPage() {
 
   return (
     <div className="bg-white text-slate-900">
-      <section className="relative isolate overflow-hidden px-6 py-20">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,_rgba(16,185,129,0.15),_transparent_55%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-50 to-white" />
+      <section className="relative isolate min-h-screen overflow-hidden px-6 py-20">
+        <Image
+          src="/assets/peaceful-meadow.jpg"
+          alt="Природный пейзаж для поддержки"
+          fill
+          className="object-cover"
+          priority
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-900/70 via-slate-900/40 to-slate-950/80" />
 
-        <div className="relative z-10 mx-auto max-w-4xl text-center space-y-6">
-          <p className="text-sm uppercase tracking-[0.4em] text-slate-500">Ресурсы</p>
-          <h1 className="font-heading text-4xl text-slate-900">Библиотека для самостоятельной поддержки</h1>
-          <p className="text-slate-600">Подборки статей, видео и практических материалов, подготовленные экспертами ПТСР Эксперт.</p>
-          <label className="mx-auto flex max-w-xl items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-500">
-            <Search className="h-4 w-4 text-slate-400" />
-            <input type="text" placeholder="Поиск по материалам" className="w-full bg-transparent text-slate-900 outline-none placeholder:text-slate-400" />
-          </label>
+        <div className="relative z-10 mx-auto max-w-5xl text-center space-y-6">
+          <p className="text-sm uppercase tracking-[0.4em] text-emerald-200/90">Ресурсы</p>
+          <h1 className="font-heading text-4xl text-white md:text-5xl">Библиотека для самостоятельной поддержки</h1>
+          <p className="text-slate-200">Подборки статей, видео и практических материалов, подготовленные экспертами ПТСР Эксперт.</p>
         </div>
-      </section>
 
-      <main className="page-container space-y-16 pb-16">
-        <section className="space-y-6">
-          <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Инструменты</p>
-          <h2 className="text-3xl font-heading text-slate-900">Что вы получаете на платформе</h2>
-          <div className="grid gap-6 md:grid-cols-2">
+        <div className="relative z-10 mx-auto mt-10 w-full max-w-6xl">
+          <div className="grid gap-4 md:grid-cols-2">
             {tools.map((tool) => (
-              <Link key={tool.title} href={tool.href} className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+              <Link
+                key={tool.title}
+                href={tool.href}
+                className="group rounded-3xl border border-white/25 bg-white/90 p-5 shadow-lg transition hover:-translate-y-1 hover:bg-white"
+              >
                 <div className="flex items-start gap-4">
                   <div className="rounded-2xl bg-slate-100 p-3">{tool.icon}</div>
                   <div className="space-y-2">
-                    <span className="text-xs uppercase tracking-[0.3em] text-slate-400">{tool.badge}</span>
-                    <h3 className="text-xl font-semibold text-slate-900">{tool.title}</h3>
+                    <span className="text-xs uppercase tracking-[0.3em] text-slate-500">{tool.badge}</span>
+                    <h3 className="text-lg font-semibold text-slate-900">{tool.title}</h3>
                     <p className="text-sm text-slate-600">{tool.description}</p>
                     <span className="text-sm font-semibold text-brand-teal">Открыть →</span>
                   </div>
@@ -141,8 +143,11 @@ export default function ResourcesPage() {
               </Link>
             ))}
           </div>
-        </section>
-        <section className="space-y-6">
+        </div>
+      </section>
+
+      <main className="page-container space-y-16 pb-16">
+        <section className="space-y-10 pt-6">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.4em] text-slate-500">Статьи</p>

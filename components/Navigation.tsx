@@ -6,6 +6,7 @@ import { useAuth } from '@/contexts/AuthContext'
 import { signOut } from 'next-auth/react'
 import { Menu, X, User, LogOut, LayoutDashboard } from 'lucide-react'
 import { useState } from 'react'
+import Image from 'next/image'
 
 export default function Navigation() {
   const pathname = usePathname()
@@ -31,8 +32,8 @@ export default function Navigation() {
         <div className="flex justify-between items-center h-16">
           {/* Логотип */}
           <Link href="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-brand-teal rounded-lg flex items-center justify-center">
-              <span className="text-white font-bold text-xl">П</span>
+            <div className="w-10 h-10 flex items-center justify-center">
+              <Image src="/logo.png" alt="ПТСР-Эксперт" width={40} height={40} />
             </div>
             
               <span>ПТСР-Эксперт</span>

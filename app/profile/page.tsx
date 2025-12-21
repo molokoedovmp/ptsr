@@ -166,7 +166,7 @@ export default function ProfilePage() {
                       </div>
                       <button
                         type="submit"
-                        className="bg-brand-teal text-white px-6 py-3 rounded-lg font-medium hover:bg-brand-teal/90 transition-colors"
+                        className="hidden bg-brand-teal text-white px-6 py-3 rounded-lg font-medium hover:bg-brand-teal/90 transition-colors md:inline-flex"
                         disabled={savingProfile}
                       >
                         {savingProfile ? 'Сохранение...' : 'Сохранить'}
@@ -221,6 +221,14 @@ export default function ProfilePage() {
                         </select>
                       </label>
                     </div>
+
+                    <button
+                      type="submit"
+                      className="w-full rounded-lg bg-brand-teal px-6 py-3 text-center font-medium text-white transition-colors hover:bg-brand-teal/90 md:hidden"
+                      disabled={savingProfile}
+                    >
+                      {savingProfile ? 'Сохранение...' : 'Сохранить'}
+                    </button>
 
                     {profileMessage && (
                       <div
