@@ -3,8 +3,14 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import { ArrowLeft, Calendar, Eye, Tag } from 'lucide-react'
-import BlockNoteViewer from '@/components/editor/BlockNoteViewer'
+
+export const dynamic = 'force-dynamic'
+
+const BlockNoteViewer = dynamic(() => import('@/components/editor/BlockNoteViewer'), {
+  ssr: false,
+})
 
 interface Article {
   id: string

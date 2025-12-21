@@ -3,9 +3,15 @@
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
-import BlockNoteEditor from '@/components/editor/BlockNoteEditor'
 import { FileText, ArrowLeft, Save } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
+
+const BlockNoteEditor = dynamic(() => import('@/components/editor/BlockNoteEditor'), {
+  ssr: false,
+})
 
 const categories = [
   { value: 'SYMPTOMS', label: 'Симптомы' },
@@ -271,4 +277,3 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
     </AdminProtectedRoute>
   )
 }
-

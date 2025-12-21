@@ -3,10 +3,16 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
 import AdminSidebar from '@/components/admin/AdminSidebar'
-import BlockNoteViewer from '@/components/editor/BlockNoteViewer'
 import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
+
+const BlockNoteViewer = dynamic(() => import('@/components/editor/BlockNoteViewer'), {
+  ssr: false,
+})
 
 interface ArticleDetail {
   id: string

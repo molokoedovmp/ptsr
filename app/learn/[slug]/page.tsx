@@ -4,8 +4,14 @@ import { useState, useEffect } from 'react'
 import { useParams, useRouter, useSearchParams } from 'next/navigation'
 import { useSession } from 'next-auth/react'
 import Link from 'next/link'
-import BlockNoteViewer from '@/components/editor/BlockNoteViewer'
+import dynamic from 'next/dynamic'
 import { BookOpen, CheckCircle, Clock, ChevronRight, ChevronLeft, Home } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
+
+const BlockNoteViewer = dynamic(() => import('@/components/editor/BlockNoteViewer'), {
+  ssr: false,
+})
 
 interface Lesson {
   id: string

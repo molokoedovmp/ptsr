@@ -3,9 +3,15 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useParams, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
-import BlockNoteEditor from '@/components/editor/BlockNoteEditor'
 import { BookOpen, ArrowLeft, Save } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
+
+const BlockNoteEditor = dynamic(() => import('@/components/editor/BlockNoteEditor'), {
+  ssr: false,
+})
 
 function NewLessonForm() {
   const router = useRouter()
@@ -192,4 +198,3 @@ export default function NewLessonPage() {
     </AdminProtectedRoute>
   )
 }
-

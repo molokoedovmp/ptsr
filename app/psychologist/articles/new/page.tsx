@@ -3,9 +3,15 @@
 import { useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import PsychologistProtectedRoute from '@/components/psychologist/PsychologistProtectedRoute'
-import BlockNoteEditor from '@/components/editor/BlockNoteEditor'
 import { ArrowLeft, FileText, Save } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
+
+const BlockNoteEditor = dynamic(() => import('@/components/editor/BlockNoteEditor'), {
+  ssr: false,
+})
 
 const categoryOptions = [
   { value: 'SYMPTOMS', label: 'Симптомы' },
