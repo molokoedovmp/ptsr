@@ -2,11 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import dynamic from 'next/dynamic'
 import ProtectedRoute from '@/components/ProtectedRoute'
 import UserSidebar from '@/components/UserSidebar'
-import BlockNoteEditor from '@/components/editor/BlockNoteEditor'
-import BlockNoteViewer from '@/components/editor/BlockNoteViewer'
 import { BookOpen, Plus, Calendar, Trash2, Edit, X } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
+
+const BlockNoteEditor = dynamic(() => import('@/components/editor/BlockNoteEditor'), {
+  ssr: false,
+})
+const BlockNoteViewer = dynamic(() => import('@/components/editor/BlockNoteViewer'), {
+  ssr: false,
+})
 
 interface DiaryEntry {
   id: string
