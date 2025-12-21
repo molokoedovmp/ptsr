@@ -3,13 +3,13 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import dynamic from 'next/dynamic'
+import dynamicImport from 'next/dynamic'
 import PsychologistProtectedRoute from '@/components/psychologist/PsychologistProtectedRoute'
 import { ArrowLeft, FileText, Save } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
-const BlockNoteEditor = dynamic(() => import('@/components/editor/BlockNoteEditor'), {
+const BlockNoteEditor = dynamicImport(() => import('@/components/editor/BlockNoteEditor'), {
   ssr: false,
 })
 

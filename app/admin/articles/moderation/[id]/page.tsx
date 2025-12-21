@@ -3,14 +3,14 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import dynamic from 'next/dynamic'
+import dynamicImport from 'next/dynamic'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
 import AdminSidebar from '@/components/admin/AdminSidebar'
 import { ArrowLeft, CheckCircle, XCircle } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
-const BlockNoteViewer = dynamic(() => import('@/components/editor/BlockNoteViewer'), {
+const BlockNoteViewer = dynamicImport(() => import('@/components/editor/BlockNoteViewer'), {
   ssr: false,
 })
 
