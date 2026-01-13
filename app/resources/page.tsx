@@ -3,7 +3,7 @@
 import Image from 'next/image'
 import Link from 'next/link'
 import { useEffect, useState } from 'react'
-import { BookOpen, Clock, Video, Brain, Heart, Activity, PenSquare } from 'lucide-react'
+import { BookOpen, Clock, Video, Brain, Heart, Activity } from 'lucide-react'
 
 const CATEGORY_LABELS: Record<string, string> = {
   SYMPTOMS: 'Симптомы',
@@ -60,11 +60,11 @@ export default function ResourcesPage() {
       badge: 'Аналитика поведения',
     },
     {
-      title: 'План действий с психологом',
-      description: 'Подбор специалистов, курсов и практик на основе ваших запросов.',
-      icon: <PenSquare className="w-6 h-6 text-purple-500" />,
-      href: '/specialists',
-      badge: 'Координация и сопровождение',
+      title: 'Духовная поддержка',
+      description: 'Подберите молитвы, практики и шаги помощи в своей традиции.',
+      icon: <BookOpen className="w-6 h-6 text-purple-500" />,
+      href: '/spiritual-support',
+      badge: 'Вера и опора',
     },
   ]
 

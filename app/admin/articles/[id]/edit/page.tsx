@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useParams } from 'next/navigation'
 import Link from 'next/link'
 import dynamicImport from 'next/dynamic'
 import AdminProtectedRoute from '@/components/admin/AdminProtectedRoute'
@@ -21,8 +21,10 @@ const categories = [
   { value: 'NEWS', label: 'Новости' },
 ]
 
-export default function EditArticlePage({ params }: { params: { id: string } }) {
+export default function EditArticlePage() {
   const router = useRouter()
+  const params = useParams<{ id: string }>()
+  const articleId = params?.id
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
@@ -44,9 +46,11 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
   })
 
   useEffect(() => {
+    if (!articleId) return
+
     const fetchArticle = async () => {
       try {
-        const response = await fetch(`/api/admin/articles/${params.id}`)
+        const response = await fetch(`/api/admin/articles/${articleId}`)
         const json = await response.json()
         if (!response.ok) throw new Error(json.error || 'Не удалось загрузить статью')
 
@@ -74,18 +78,24 @@ export default function EditArticlePage({ params }: { params: { id: string } }) 
     }
 
     fetchArticle()
-  }, [params.id])
+  }, [articleId])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    if (!articleId) {
+      setError('Не удалось определить статью')
+      return
+    }
     setSaving(true)
     setError('')
     try {
-      const response = await fetch(`/api/admin/articles/${params.id}`, {
+      const status = formData.published ? 'APPROVED' : 'DRAFT'
+      const response = await fetch(`/api/admin/articles/${articleId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...formData,
+          status,
           readingMinutes: formData.readingMinutes ? Number(formData.readingMinutes) : null,
           publishedAt: formData.publishedAt || null,
           tags: formData.tags.split(',').map((tag) => tag.trim()).filter(Boolean),

@@ -8,7 +8,6 @@ export async function GET() {
     const articles = await prisma.article.findMany({
       where: {
         published: true,
-        status: ArticleStatus.APPROVED,
         OR: [{ publishedAt: null }, { publishedAt: { lte: now } }],
       },
       orderBy: { createdAt: 'desc' },

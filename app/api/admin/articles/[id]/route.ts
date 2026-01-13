@@ -71,6 +71,12 @@ export async function PATCH(
 
     const data = await request.json()
 
+    // Если пришёл только published без статуса, выводим его в явный статус,
+    // чтобы клиентские фильтры не теряли опубликованные материалы.
+    if (typeof data.published === 'boolean' && !data.status) {
+      data.status = data.published ? ArticleStatus.APPROVED : ArticleStatus.DRAFT
+    }
+
     const dataUpdate: any = {}
     if (data.title) dataUpdate.title = data.title
     if (data.slug) dataUpdate.slug = data.slug
@@ -95,6 +101,7 @@ export async function PATCH(
         dataUpdate.verifiedAt = dataUpdate.verifiedAt ?? new Date()
       } else if ([ArticleStatus.REJECTED, ArticleStatus.PENDING, ArticleStatus.DRAFT].includes(data.status)) {
         dataUpdate.published = false
+        dataUpdate.verifiedAt = null
       }
     }
 
