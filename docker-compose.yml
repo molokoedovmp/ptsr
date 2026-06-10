@@ -1,11 +1,27 @@
 services:
+  db:
+    image: postgres:16
+    container_name: ptsr-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: ptsr_prod
+    volumes:
+      - ptsr_db_data:/var/lib/postgresql/data
+
   app:
     build: .
     container_name: ptsr-app
     ports:
-      - "3000:3000"
+      - "3003:3000"
     env_file:
-      - .env
+      - .env.production
     environment:
-      RUN_MIGRATIONS: "1"   # прогнать prisma migrate deploy при старте
+      RUN_MIGRATIONS: "1"
     restart: unless-stopped
+    depends_on:
+      - db
+
+volumes:
+  ptsr_db_data:
